@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Mr. Markuss's Grammar Rap Interactive Workbook: Singular, Plural and Collective Nouns</title>
+<style>
+:root{
+  --bg:#17110b;--panel:#221a12;--panel2:#2e2318;--ink:#fbf3e4;--muted:#c9b89c;
+  --gold:#f2b33d;--orange:#e07a2e;--olive:#b9c23c;--green:#6fd35a;--red:#e5533d;--line:#3d2f20;
+  --display:"Arial Black","Arial Bold",Impact,"Helvetica Neue",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:none}
+body{font-family:var(--display);font-weight:900}
+button{font-family:inherit;font-weight:inherit;color:inherit;touch-action:manipulation}
+/* fixed 800x500 design canvas, scaled to fit the Heyzine box */
+#app{position:absolute;left:0;top:0;width:800px;height:500px;transform-origin:0 0;display:flex;flex-direction:column;gap:8px;padding:9px 12px 12px;
+  background:radial-gradient(circle at 1px 1px,rgba(255,240,210,.06) 1px,transparent 0) 0 0/14px 14px,var(--bg)}
+header{height:52px;display:flex;align-items:center;gap:6px}
+.logo{font-size:20px;color:var(--gold);transform:skew(-7deg);text-shadow:2px 2px 0 var(--orange),4px 4px 0 #000;line-height:1;white-space:nowrap}
+.logo small{display:block;font-family:var(--body);font-weight:800;font-size:10px;letter-spacing:.5px;color:var(--olive);text-shadow:none;margin-top:4px}
+nav.tabs{flex:1;display:flex;gap:5px;justify-content:center;min-width:0}
+.tab{background:var(--panel);border:3px solid #000;border-radius:12px;padding:0 8px;height:46px;cursor:pointer;font-size:14px;box-shadow:3px 3px 0 #000;white-space:nowrap}
+.tab span{color:var(--gold)}
+.tab.active{background:var(--gold);color:#1a120a;box-shadow:3px 3px 0 var(--orange)}
+.tab.active span{color:#1a120a}
+.tab:active{transform:translate(2px,2px)}
+.chip{background:var(--panel);border:3px solid #000;border-radius:12px;height:46px;min-width:84px;display:flex;align-items:center;justify-content:center;padding:0 8px;font-size:16px}
+.chip b{color:var(--gold);margin-left:5px}
+.iconbtn{background:var(--panel);border:3px solid #000;border-radius:12px;width:44px;height:46px;flex:none;cursor:pointer;font-size:20px}
+#stage{position:relative;flex:1;min-height:0;border:3px solid #000;border-radius:18px;box-shadow:5px 5px 0 #000;overflow:hidden;background:#120d08}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
+.ov{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:16px 26px;background:rgba(10,6,2,.9);animation:fade .15s}
+.card{width:100%;max-width:680px;background:#120d08;border:4px solid var(--gold);border-radius:18px;box-shadow:5px 5px 0 #000;padding:14px 20px;text-align:center}
+.card.bad{border-color:var(--red);text-align:left}
+.card.good{border-color:var(--green)}
+.ct{font-size:34px;color:var(--gold);text-shadow:3px 3px 0 var(--orange),5px 5px 0 #000;transform:skew(-6deg);margin-bottom:6px;line-height:1.05}
+.card.bad .ct{font-size:30px;color:var(--red);text-shadow:2px 2px 0 #000}
+.cb{font-family:var(--body);font-weight:700;font-size:22px;line-height:1.38;color:#f6ecd9;margin-bottom:12px}
+.cb b{color:var(--gold)}
+.ctl{display:inline-block;font-family:var(--body);font-weight:800;font-size:17px;color:var(--muted);background:var(--panel2);border:2px solid #000;border-radius:10px;padding:5px 12px;margin-bottom:12px}
+.stats{display:flex;gap:10px;justify-content:center;margin:4px 0 10px}
+.stat{background:var(--panel2);border:3px solid #000;border-radius:12px;padding:4px 16px;box-shadow:3px 3px 0 #000;min-width:130px}
+.stat b{display:block;font-size:30px;color:var(--olive)}
+.stat small{font-family:var(--body);font-weight:800;font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{background:var(--gold);color:#1a120a;border:3px solid #000;border-radius:14px;box-shadow:4px 4px 0 #000;padding:10px 24px;cursor:pointer;font-size:22px}
+.btn.alt{background:var(--panel2);color:var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
+#title{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;
+  background:radial-gradient(ellipse at 50% 40%,rgba(224,122,46,.25),transparent 60%),radial-gradient(circle at 1px 1px,rgba(255,240,210,.07) 1px,transparent 0) 0 0/14px 14px,var(--bg)}
+#title.hide{animation:titleout .3s ease-in forwards}
+.t-kicker{font-family:var(--body);font-weight:800;font-size:20px;letter-spacing:5px;color:var(--olive);text-transform:uppercase}
+.t-name{font-size:92px;line-height:.95;color:var(--gold);transform:skew(-7deg) rotate(-2deg);text-shadow:5px 5px 0 var(--orange),10px 10px 0 #000;margin:8px 0 6px;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.t-mid{font-size:22px;letter-spacing:6px;color:var(--olive);margin-bottom:10px}
+.t-sub{font-size:28px;color:var(--ink);text-shadow:3px 3px 0 #000}
+.t-levels{display:flex;gap:10px;margin:16px 0 18px}
+.t-levels div{background:var(--panel2);border:3px solid #000;border-radius:12px;box-shadow:3px 3px 0 #000;padding:7px 14px;font-size:17px}
+.t-levels span{color:var(--gold)}
+#playnow{font-size:36px;padding:14px 46px;border-radius:18px;box-shadow:6px 6px 0 #000;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes titleout{to{opacity:0;transform:scale(1.04)}}
+@keyframes pop{0%{transform:scale(.6) rotate(-6deg);opacity:0}100%{transform:skew(-7deg) rotate(-2deg);opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">GRAMMAR RAP<small>SINGULAR · PLURAL · COLLECTIVE</small></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" data-l="1" role="tab"><span>1</span> WHACK IT</button>
+      <button class="tab" data-l="2" role="tab"><span>2</span> PLURAL SNAKE</button>
+      <button class="tab" data-l="3" role="tab"><span>3</span> GROUPS</button>
+    </nav>
+    <div class="chip">PTS<b id="score">0</b></div>
+    <button class="iconbtn" id="help" aria-label="Show the rule" title="Rule">?</button>
+    <button class="iconbtn" id="mute" aria-label="Toggle sound" title="Sound">🔊</button>
+  </header>
+  <main id="stage"><canvas id="cv"></canvas></main>
+  <div id="title" role="dialog" aria-label="Title screen">
+    <div class="t-kicker">Mr. Markuss's</div>
+    <div class="t-name">GRAMMAR RAP</div>
+    <div class="t-mid">INTERACTIVE WORKBOOK</div>
+    <div class="t-sub">SINGULAR, PLURAL &amp; COLLECTIVE NOUNS</div>
+    <div class="t-levels"><div><span>1</span> WHACK IT</div><div><span>2</span> PLURAL SNAKE</div><div><span>3</span> GROUP GALLERY</div></div>
+    <button class="btn" id="playnow">PLAY NOW</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== CONTENT (from page 10) ===================== */
+// singular / plural pairs
+var PAIRS = [
+  ["president","presidents"],["woman","women"],["cashier","cashiers"],["office","offices"],["store","stores"],
+  ["idea","ideas"],["dog","dogs"],["car","cars"],["mouse","mice"],["child","children"],["tooth","teeth"],
+  ["goose","geese"],["person","people"],["box","boxes"],["city","cities"],["knife","knives"],["leaf","leaves"],
+  ["baby","babies"],["foot","feet"],["bus","buses"]
+];
+// collective nouns and what they are a group of
+var COLL = [
+  ["team","players"],["choir","singers"],["flock","birds"],["herd","cows"],["class","students"],["crowd","people"],
+  ["audience","listeners"],["band","musicians"],["family","relatives"],["jury","jurors"],["pack","wolves"],
+  ["faculty","teachers"],["swarm","bees"],["fleet","ships"],["army","soldiers"],["crew","workers"]
+];
+// Level 2: plural snake. s = singular, p = correct plural, w = wrong forms, n = the rule
+var SNAKE = [
+  {s:"mouse",p:"mice",w:["mices","mousies"],n:"Some plurals change their vowels: one <b>mouse</b>, two <b>mice</b>."},
+  {s:"child",p:"children",w:["childs","childrens"],n:"<b>child</b> becomes <b>children</b>. It is irregular, so it does not add -s."},
+  {s:"tooth",p:"teeth",w:["tooths","teeths"],n:"Some plurals change their vowels: <b>tooth</b> becomes <b>teeth</b>."},
+  {s:"foot",p:"feet",w:["foots","feets"],n:"Some plurals change their vowels: <b>foot</b> becomes <b>feet</b>."},
+  {s:"goose",p:"geese",w:["gooses","geeses"],n:"Some plurals change their vowels: <b>goose</b> becomes <b>geese</b>."},
+  {s:"woman",p:"women",w:["womans","womens"],n:"Page 10 shows it: <b>woman</b> becomes <b>women</b>, with no -s."},
+  {s:"man",p:"men",w:["mans","mens"],n:"<b>man</b> becomes <b>men</b>, with no -s."},
+  {s:"fish",p:"fish",w:["fishs","fishies"],n:"Page 10: some plurals stay the same. One <b>fish</b>, two <b>fish</b>."},
+  {s:"moose",p:"moose",w:["mooses","meese"],n:"Page 10: <b>moose</b> stays <b>moose</b>, whether there is one or many."},
+  {s:"shrimp",p:"shrimp",w:["shrimpies","shrimpes"],n:"Page 10: <b>shrimp</b> can mean one shrimp or many shrimp."},
+  {s:"sheep",p:"sheep",w:["sheeps","sheepes"],n:"<b>sheep</b> stays the same: one sheep, ten sheep."},
+  {s:"deer",p:"deer",w:["deeres","deerz"],n:"<b>deer</b> stays the same: one deer, a field of deer."},
+  {s:"box",p:"boxes",w:["boxs","boxies"],n:"Words ending in <b>x, s, sh</b> or <b>ch</b> add <b>-es</b>: box, boxes."},
+  {s:"bus",p:"buses",w:["buss","busies"],n:"Words ending in <b>s</b> add <b>-es</b>: bus, buses."},
+  {s:"city",p:"cities",w:["citys","cityes"],n:"Consonant + y: change the <b>y</b> to <b>i</b> and add <b>-es</b>. city, cities."},
+  {s:"baby",p:"babies",w:["babys","babyes"],n:"Consonant + y: change the <b>y</b> to <b>i</b> and add <b>-es</b>. baby, babies."},
+  {s:"knife",p:"knives",w:["knifs","knivs"],n:"Many words ending in <b>f</b> or <b>fe</b> change to <b>-ves</b>: knife, knives."},
+  {s:"wolf",p:"wolves",w:["wolfes","wolvz"],n:"Many words ending in <b>f</b> change to <b>-ves</b>: wolf, wolves."},
+  {s:"person",p:"people",w:["persones","peoplez"],n:"Page 10: more than one person is <b>people</b>."},
+  {s:"cashier",p:"cashiers",w:["cashieres","cashierz"],n:"Most nouns just add <b>-s</b>: cashier, cashiers."},
+  {s:"president",p:"presidents",w:["presidentes","presidenties"],n:"Most nouns just add <b>-s</b>: president, presidents."},
+  {s:"idea",p:"ideas",w:["ideaes","ideaz"],n:"Most nouns just add <b>-s</b>: idea, ideas."}
+];
+// Level 3: group gallery
+var GROUPS = [
+  {g:"birds",e:"🐦",a:"flock"},{g:"cows",e:"🐄",a:"herd"},{g:"wolves",e:"🐺",a:"pack"},{g:"fish",e:"🐟",a:"school",x:["class","faculty"]},
+  {g:"bees",e:"🐝",a:"swarm"},{g:"singers",e:"🎤",a:"choir",x:["band"]},{g:"players",e:"🏀",a:"team"},{g:"ships",e:"🚢",a:"fleet"},
+  {g:"students",e:"🎒",a:"class",x:["school","faculty"]},{g:"musicians",e:"🎸",a:"band",x:["choir"]},{g:"lions",e:"🦁",a:"pride"},{g:"grapes",e:"🍇",a:"bunch"},
+  {g:"teachers at a school",e:"🍎",a:"faculty",x:["school","class"]}
+];
+var VERBS = [
+  {v:"The team ___ ready for the game.",c:"team"},{v:"The choir ___ singing tonight.",c:"choir"},
+  {v:"Our class ___ going on a field trip.",c:"class"},{v:"The flock ___ flying south.",c:"flock"},
+  {v:"The band ___ playing my song.",c:"band"}
+];
+var BAD=["Not quite.","Almost.","Take another look."];
+
+/* ===================== HELPERS ===================== */
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+var stage=$("#stage"), cv=$("#cv"), ctx=cv.getContext("2d");
+var CW=770, CH=410, DPR=2, soundOn=true, actx=null, level=1, total=0;
+function sizeCanvas(){ CW=stage.clientWidth; CH=stage.clientHeight; cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+
+function beep(kind){
+  if(!soundOn) return;
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume();
+    var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.connect(g);g.connect(actx.destination);var len=.25;
+    if(kind==="good"){o.type="square";o.frequency.setValueAtTime(660,t);o.frequency.setValueAtTime(990,t+.07)}
+    else if(kind==="bad"){o.type="sawtooth";o.frequency.setValueAtTime(200,t);o.frequency.linearRampToValueAtTime(80,t+.3);len=.32}
+    else if(kind==="bonk"){o.type="triangle";o.frequency.setValueAtTime(320,t);o.frequency.exponentialRampToValueAtTime(110,t+.12);len=.14}
+    else if(kind==="chomp"){o.type="square";o.frequency.setValueAtTime(440,t);o.frequency.setValueAtTime(660,t+.05);len=.12}
+    else if(kind==="shot"){o.type="square";o.frequency.setValueAtTime(900,t);o.frequency.exponentialRampToValueAtTime(120,t+.15);len=.16}
+    else if(kind==="win"){o.type="square";[523,659,784,1046].forEach(function(f,i){o.frequency.setValueAtTime(f,t+i*.1)});len=.5}
+    else {o.type="triangle";o.frequency.setValueAtTime(520,t);len=.12}
+    g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+len);o.start(t);o.stop(t+len+.02);
+  }catch(e){}
+}
+function addScore(n){ total=Math.max(0,total+n); $("#score").textContent=total; }
+
+/* ---------- drawing helpers ---------- */
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function font(px){return "900 "+px+"px \"Arial Black\",\"Arial Bold\",Impact,sans-serif"}
+function bodyFont(px){return "800 "+px+"px system-ui,\"Segoe UI\",Roboto,Arial,sans-serif"}
+function pill(text,x,y,px,fill,ink){
+  ctx.font=font(px); var w=ctx.measureText(text).width+px*1.1, h=px*1.7;
+  rr(x-w/2+3,y-h/2+3,w,h,h/2); ctx.fillStyle="#000"; ctx.fill();
+  rr(x-w/2,y-h/2,w,h,h/2); ctx.fillStyle=fill; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle="#000"; ctx.stroke();
+  ctx.fillStyle=ink; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(text,x,y+1);
+  return {w:w,h:h};
+}
+var HUD=42;
+function hudBand(){ ctx.fillStyle="rgba(12,9,6,.94)"; ctx.fillRect(0,0,CW,HUD); ctx.fillStyle="#3d2f20"; ctx.fillRect(0,HUD,CW,2); }
+function hearts(n){ ctx.font=font(22); ctx.textAlign="left"; ctx.textBaseline="middle"; for(var i=0;i<3;i++){ ctx.fillStyle=i<n?"#e5533d":"#3d2f20"; ctx.fillText("♥",14+i*26,HUD/2+1); } }
+function hudRight(t){ ctx.font=font(18); ctx.textAlign="right"; ctx.textBaseline="middle"; ctx.fillStyle="#f2b33d"; ctx.fillText(t,CW-14,HUD/2+1); }
+function hudCenter(t,col){ ctx.font=font(22); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle="#000"; ctx.fillText(t,CW/2+2,HUD/2+3); ctx.fillStyle=col||"#fbf3e4"; ctx.fillText(t,CW/2,HUD/2+1); }
+var parts=[], floats=[];
+function burst(x,y,col,n){ for(var i=0;i<(n||14);i++){ var a=Math.random()*6.283,s=rnd(80,240); parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.6,col:col}); } }
+function floatText(t,x,y,col){ floats.push({t:t,x:x,y:y,life:1,col:col}); }
+function stepFx(dt){ for(var i=parts.length-1;i>=0;i--){var p=parts[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=380*dt;if(p.life<=0)parts.splice(i,1)}
+  for(var j=floats.length-1;j>=0;j--){var f=floats[j];f.life-=dt;f.y-=40*dt;if(f.life<=0)floats.splice(j,1)} }
+function drawFx(){ parts.forEach(function(p){ ctx.globalAlpha=Math.max(0,p.life/.6); ctx.fillStyle=p.col; ctx.fillRect(p.x-3,p.y-3,6,6); });
+  floats.forEach(function(f){ ctx.globalAlpha=Math.max(0,f.life); ctx.font=font(22); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle="#000"; ctx.fillText(f.t,f.x+2,f.y+2); ctx.fillStyle=f.col; ctx.fillText(f.t,f.x,f.y); });
+  ctx.globalAlpha=1; }
+
+/* ===================== OVERLAYS ===================== */
+var paused=false, pendingCb=null, pendingSkip=null;
+function overlay(html,cls){ closeOverlay(); var d=document.createElement("div"); d.className="ov"; d.innerHTML='<div class="card '+(cls||"")+'">'+html+'</div>'; stage.appendChild(d); return d; }
+function closeOverlay(){ var o=$(".ov",stage); if(o) o.parentNode.removeChild(o); }
+function feedback(title,body,cb,onSkip){
+  paused=true; beep("bad");
+  var d=overlay('<div class="ct">'+title+'</div><div class="cb">'+body+'</div><div class="row"><button class="btn" id="fbgo">Keep going</button></div>',"bad");
+  var go=function(){ pendingCb=null; pendingSkip=null; closeOverlay(); paused=false; last=performance.now(); if(cb) cb(); };
+  pendingCb=go; pendingSkip=onSkip||null; $("#fbgo",d).addEventListener("click",go);
+}
+var HELP={
+  1:'A <b>singular</b> noun is just ONE: <b>dog, woman, mouse</b>. A <b>plural</b> noun is more than one: <b>dogs, women, mice</b>. A <b>collective</b> noun names one GROUP: <b>team, choir, flock</b>. A collective noun is also singular, because it is only one group.',
+  2:'Most plurals add <b>-s</b>. Words ending in <b>x, s, sh, ch</b> add <b>-es</b>. Consonant + y becomes <b>-ies</b>. Many f/fe words become <b>-ves</b>. Some change inside (<b>mouse → mice</b>) and some stay the same (<b>fish, moose, shrimp</b>).',
+  3:'A collective noun names one group: a <b>flock</b> of birds, a <b>herd</b> of cows, a <b>team</b> of players. Because it is ONE group, it takes a singular verb: <b>The team is ready.</b>'
+};
+function showHelp(){
+  if(paused) return; var g=G[level]; if(g.state!=="play") return infoCard();
+  paused=true; var d=overlay('<div class="ct">THE RULE</div><div class="cb">'+HELP[level]+'</div><div class="row"><button class="btn" id="hgo">Got it</button></div>');
+  $("#hgo",d).addEventListener("click",function(){ closeOverlay(); paused=false; last=performance.now(); });
+}
+
+/* ===================== FRAMEWORK ===================== */
+var INFO={
+  1:{name:"WHACK IT",how:'Words pop out of the holes. Each round tells you what to whack: <b>PLURAL</b>, then <b>SINGULAR</b>, then <b>COLLECTIVE</b>. Whack 5 right in each round.',ctl:'Tap or click a word to whack it'},
+  2:{name:"PLURAL SNAKE",how:'The top bar shows a singular noun. Steer the snake to eat its <b>correct plural</b>. Eat 10 to win. Wrong plurals cost a heart.',ctl:'Arrow keys, or tap where you want to go'},
+  3:{name:"GROUP GALLERY",how:'Hit the target with the <b>collective noun</b> for each group, or the <b>verb</b> that fits. Beat the clock on every round. 10 rounds.',ctl:'Tap or click a target'}
+};
+var G={1:{state:"intro"},2:{state:"intro"},3:{state:"intro"}};
+function infoCard(){
+  var g=G[level], i=INFO[level]; if(g.state==="play") g.state="paused"; var ps=g.state==="paused"; paused=true;
+  var d=overlay('<div class="ct">LEVEL '+level+': '+i.name+'</div><div class="cb">'+i.how+'</div><div class="ctl">'+i.ctl+'</div>'+
+    '<div class="row">'+(ps?'<button class="btn" id="resume">RESUME</button><button class="btn alt" id="start">RESTART</button>':'<button class="btn" id="start">START</button>')+'</div>');
+  $("#start",d).addEventListener("click",function(){ closeOverlay(); paused=false; startLevel(level); });
+  var r=$("#resume",d); if(r) r.addEventListener("click",function(){ closeOverlay(); paused=false; g.state="play"; last=performance.now(); });
+}
+function startLevel(lv){ parts=[]; floats=[]; beep("tap"); G[lv]=lv===1?newL1():lv===2?newL2():newL3(); G[lv].state="play"; last=performance.now(); }
+function endLevel(win,lines){
+  var g=G[level]; if(g.state==="over") return; g.state="over"; paused=true; beep(win?"win":"bad");
+  var best=parseInt(store("spc_best"+level)||"0",10)||0, nb=false; if(g.score>best){ store("spc_best"+level,String(g.score)); best=g.score; nb=true; }
+  var d=overlay('<div class="ct">'+(win?"LEVEL CLEAR!":"GAME OVER")+'</div><div class="stats"><div class="stat"><b>'+g.score+'</b><small>'+(nb?"New best":"Score")+'</small></div><div class="stat"><b>'+best+'</b><small>Best</small></div></div>'+
+    '<div class="cb">'+lines+'</div><div class="row"><button class="btn alt" id="again">PLAY AGAIN</button>'+(level<3?'<button class="btn" id="next">LEVEL '+(level+1)+' →</button>':'')+'</div>', win?"good":"");
+  $("#again",d).addEventListener("click",function(){ closeOverlay(); paused=false; startLevel(level); });
+  var n=$("#next",d); if(n) n.addEventListener("click",function(){ go(level+1); });
+}
+
+/* ===================== LEVEL 1: WHACK IT ===================== */
+var ROUNDS=[{t:"plural",label:"WHACK THE PLURAL NOUNS"},{t:"singular",label:"WHACK THE SINGULAR NOUNS"},{t:"collective",label:"WHACK THE COLLECTIVE NOUNS"}];
+function newL1(){
+  var holes=[]; for(var r=0;r<2;r++) for(var c=0;c<3;c++) holes.push({x:CW*(c*2+1)/6, y:HUD+ (CH-HUD)*(r===0?.36:.80), st:"down",p:0,t:0,w:null,hit:0});
+  return {lives:3,score:0,round:0,got:0,goal:5,holes:holes,spawnT:1.2,banner:1.8,upTime:1.7};
+}
+function l1Word(g){
+  var t=ROUNDS[g.round].t, want=Math.random()<.45, pr=pick(PAIRS), co=pick(COLL);
+  if(t==="plural"){ if(want) return {w:pr[1],type:"plural",pair:pr}; return Math.random()<.4?{w:co[0],type:"collective",co:co}:{w:pr[0],type:"singular",pair:pr}; }
+  if(t==="singular"){ return want?{w:pr[0],type:"singular",pair:pr}:{w:pr[1],type:"plural",pair:pr}; }
+  if(want) return {w:co[0],type:"collective",co:co}; return Math.random()<.6?{w:co[1],type:"plural",co:co}:{w:pr[0],type:"singular",pair:pr};
+}
+function l1Update(g,dt){
+  if(g.banner>0){ g.banner-=dt; return; }
+  g.spawnT-=dt;
+  if(g.spawnT<=0){
+    var idle=g.holes.filter(function(h){return h.st==="down"&&h.p<=0;});
+    if(idle.length){ var h=pick(idle), w=l1Word(g), tries=0;
+      while(g.holes.some(function(o){return o.w&&o.st!=="down"&&o.w.w===w.w;}) && tries++<6) w=l1Word(g);
+      h.w=w; h.st="up"; h.t=g.upTime; h.hit=0; }
+    g.spawnT=rnd(.55,.95)-g.round*.08;
+  }
+  g.holes.forEach(function(h){
+    if(h.st==="up"){ h.p=Math.min(1,h.p+dt*6); h.t-=dt; if(h.t<=0) h.st="down"; }
+    else { h.p=Math.max(0,h.p-dt*(h.hit?4:6)); if(h.p<=0) h.hit=0; }
+  });
+}
+function l1Tap(x,y){
+  var g=G[1]; if(g.state!=="play"||paused||g.banner>0||g.winAt!=null) return;
+  for(var i=0;i<g.holes.length;i++){
+    var h=g.holes[i]; if(h.st!=="up"||h.p<.5||h.hit) continue;
+    if(Math.abs(x-h.x)<118 && y<h.y+14 && y>h.y-86){
+      var w=h.w, t=ROUNDS[g.round].t;
+      h.hit=1; h.st="down";
+      if(w.type===t){
+        g.got++; g.score+=10; addScore(10); beep("bonk"); burst(h.x,h.y-40,"#f2b33d",16); floatText("+10",h.x,h.y-90,"#6fd35a");
+        if(g.got>=g.goal){
+          if(g.round<2){ g.round++; g.got=0; g.banner=1.8; g.upTime=Math.max(1.15,g.upTime-.2); g.holes.forEach(function(o){o.st="down";}); }
+          else { g.winAt=.5; g.holes.forEach(function(o){o.st="down";}); }
+        }
+      } else {
+        g.lives--; h.bad=.5; burst(h.x,h.y-40,"#e5533d",12);
+        feedback(pick(BAD),l1Explain(w,t),function(){ if(g.lives<=0) endLevel(false,'Singular = one. Plural = more than one. Collective = one group.'); });
+      }
+      return;
+    }
+  }
+}
+function l1Explain(w,t){
+  if(w.type==="collective") return '<b>'+w.w+'</b> names a group of '+w.co[1]+', but it is ONE group. Page 10 says a collective noun is also a <b>singular</b> noun, so it is not plural.';
+  if(w.type==="singular"&&t==="plural") return '<b>'+w.w+'</b> is singular: just ONE. The plural is <b>'+w.pair[1]+'</b>.';
+  if(w.type==="singular"&&t==="collective") return '<b>'+w.w+'</b> names just one person, place or thing. A collective noun names a GROUP, like <b>team</b> or <b>flock</b>.';
+  if(w.type==="plural"&&t==="singular") return '<b>'+w.w+'</b> is plural: more than one. The singular is <b>'+w.pair[0]+'</b>.';
+  if(w.type==="plural"&&t==="collective") return '<b>'+w.w+'</b> is a plural noun. '+(w.co?'The collective noun for a group of '+w.w+' is '+(/^[aeiou]/.test(w.co[0])?'an':'a')+' <b>'+w.co[0]+'</b>.':'A collective noun names one group, like <b>team</b> or <b>flock</b>.');
+  return '<b>'+w.w+'</b> is not '+t+'.';
+}
+function l1Draw(g){
+  var gr=ctx.createLinearGradient(0,0,0,CH); gr.addColorStop(0,"#2b5a2a"); gr.addColorStop(1,"#1d3d1c"); ctx.fillStyle=gr; ctx.fillRect(0,0,CW,CH);
+  g.holes.forEach(function(h){
+    ctx.fillStyle="#120d08"; ctx.beginPath(); ctx.ellipse(h.x,h.y,108,22,0,0,6.2832); ctx.fill();
+    if(h.p>0&&h.w){
+      ctx.save(); ctx.beginPath(); ctx.rect(h.x-130,h.y-130,260,130); ctx.clip();
+      var lift=(1-h.p)*90, cy=h.y-46+lift, red=h.bad>0;
+      ctx.font=font(26); var tw=Math.min(214,ctx.measureText(h.w.w).width+34);
+      rr(h.x-tw/2+4,cy-30+4,tw,62,14); ctx.fillStyle="#000"; ctx.fill();
+      rr(h.x-tw/2,cy-30,tw,62,14); ctx.fillStyle=red?"#e5533d":(h.hit?"#6fd35a":"#fbf3e4"); ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle="#000"; ctx.stroke();
+      var fz=26; ctx.font=font(fz); while(ctx.measureText(h.w.w).width>tw-24&&fz>16){fz-=2;ctx.font=font(fz);}
+      ctx.fillStyle="#1a120a"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(h.w.w,h.x,cy+2);
+      ctx.restore();
+    }
+    ctx.strokeStyle="#0a0705"; ctx.lineWidth=6; ctx.beginPath(); ctx.ellipse(h.x,h.y,108,22,0,0,Math.PI); ctx.stroke();
+    if(h.bad>0) h.bad-=1/60;
+  });
+  hudBand(); hearts(g.lives); hudCenter(ROUNDS[g.round].label,"#f2b33d"); hudRight("ROUND "+(g.round+1)+"/3  "+g.got+"/"+g.goal);
+  if(g.banner>0){ ctx.fillStyle="rgba(10,6,2,.75)"; ctx.fillRect(0,HUD,CW,CH-HUD);
+    ctx.font=font(20); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle="#b9c23c"; ctx.fillText("ROUND "+(g.round+1),CW/2,CH/2-40);
+    ctx.font=font(40); ctx.fillStyle="#000"; ctx.fillText(ROUNDS[g.round].label,CW/2+3,CH/2+13); ctx.fillStyle="#f2b33d"; ctx.fillText(ROUNDS[g.round].label,CW/2,CH/2+10); }
+}
+
+/* ===================== LEVEL 2: PLURAL SNAKE ===================== */
+var CELL=32;
+function newL2(){
+  var cols=Math.floor(CW/CELL), rows=Math.floor((CH-HUD-4)/CELL), ox=Math.floor((CW-cols*CELL)/2), oy=HUD+4;
+  var sy=Math.floor(rows/2), snake=[]; for(var i=0;i<4;i++) snake.push({x:5-i,y:sy});
+  var g={lives:3,score:0,got:0,goal:10,cols:cols,rows:rows,ox:ox,oy:oy,snake:snake,dir:{x:1,y:0},next:{x:1,y:0},step:.2,acc:0,grow:0,q:shuffle(SNAKE),cur:null,foods:[]};
+  l2NewPrompt(g); return g;
+}
+function l2NewPrompt(g){
+  if(!g.q.length) g.q=shuffle(SNAKE);
+  g.cur=g.q.pop(); g.foods=[];
+  var words=shuffle([{t:g.cur.p,ok:1},{t:g.cur.w[0],ok:0},{t:g.cur.w[1],ok:0}]);
+  words.forEach(function(f){
+    ctx.font=font(17); var wc=Math.max(2,Math.ceil((ctx.measureText(f.t).width+20)/CELL));
+    for(var tries=0;tries<200;tries++){
+      var x=Math.floor(Math.random()*(g.cols-wc)), y=Math.floor(Math.random()*g.rows);
+      var head=g.snake[0];
+      var clash=g.snake.some(function(s){return s.y===y&&s.x>=x-1&&s.x<=x+wc;}) || (Math.abs(head.y-y)<=1&&Math.abs(head.x-x)<6) ||
+        g.foods.some(function(o){return Math.abs(o.y-y)<=1 && x<o.x+o.w+1 && x+wc+1>o.x;});
+      if(!clash){ f.x=x; f.y=y; f.w=wc; g.foods.push(f); break; }
+    }
+  });
+}
+function l2Update(g,dt){
+  if(g.winAt!=null){ g.winAt-=dt; if(g.winAt<=0) endLevel(true,'You fed the snake '+g.goal+' correct plurals, irregular ones included.'); return; }
+  g.acc+=dt; if(g.acc<g.step) return; g.acc=0;
+  if(!(g.next.x===-g.dir.x&&g.next.y===-g.dir.y)) g.dir=g.next;
+  var h=g.snake[0], nx=(h.x+g.dir.x+g.cols)%g.cols, ny=(h.y+g.dir.y+g.rows)%g.rows;
+  g.snake.unshift({x:nx,y:ny}); if(g.grow>0) g.grow--; else g.snake.pop();
+  for(var i=0;i<g.foods.length;i++){
+    var f=g.foods[i];
+    if(ny===f.y && nx>=f.x && nx<f.x+f.w){
+      var px=g.ox+(f.x+f.w/2)*CELL, py=g.oy+(f.y+.5)*CELL;
+      if(f.ok){ g.got++; g.grow+=2; var pts=10+Math.round((.2-g.step)*100); g.score+=pts; addScore(pts); beep("chomp"); burst(px,py,"#6fd35a",16); floatText("+"+pts,px,py-26,"#6fd35a");
+        g.step=Math.max(.11,g.step-.009);
+        if(g.got>=g.goal){ g.foods=[]; g.winAt=.5; return; }
+        l2NewPrompt(g);
+      } else {
+        g.lives--; burst(px,py,"#e5533d",12); var c=g.cur;
+        feedback(pick(BAD),'<b>'+f.t+'</b> is not the plural of <b>'+c.s+'</b>. The plural is <b>'+c.p+'</b>. '+c.n,function(){ if(g.lives<=0) endLevel(false,'Remember the patterns: -s, -es, -ies, -ves, vowel changes, and words that stay the same.'); else l2NewPrompt(g); });
+      }
+      return;
+    }
+  }
+}
+function l2Dir(dx,dy){ var g=G[2]; if(g.state!=="play"||paused) return; if(dx===-g.dir.x&&dy===-g.dir.y) return; g.next={x:dx,y:dy}; }
+function l2Tap(x,y){
+  var g=G[2]; if(g.state!=="play"||paused) return;
+  var h=g.snake[0], hx=g.ox+(h.x+.5)*CELL, hy=g.oy+(h.y+.5)*CELL, dx=x-hx, dy=y-hy;
+  if(g.dir.x!==0){ if(Math.abs(dy)>CELL*.6) l2Dir(0,dy>0?1:-1); else if(Math.sign(dx)===-g.dir.x) return; }
+  else { if(Math.abs(dx)>CELL*.6) l2Dir(dx>0?1:-1,0); }
+}
+function l2Draw(g){
+  ctx.fillStyle="#1c150e"; ctx.fillRect(0,0,CW,CH);
+  for(var y=0;y<g.rows;y++) for(var x=0;x<g.cols;x++) if((x+y)%2===0){ ctx.fillStyle="#211910"; ctx.fillRect(g.ox+x*CELL,g.oy+y*CELL,CELL,CELL); }
+  g.foods.forEach(function(f){
+    var x=g.ox+f.x*CELL+2, y=g.oy+f.y*CELL+2, w=f.w*CELL-4, h=CELL-4;
+    rr(x+2,y+2,w,h,10); ctx.fillStyle="#000"; ctx.fill();
+    rr(x,y,w,h,10); ctx.fillStyle="#f2b33d"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke();
+    ctx.font=font(17); ctx.fillStyle="#1a120a"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(f.t,x+w/2,y+h/2+1);
+  });
+  for(var i=g.snake.length-1;i>=0;i--){
+    var s=g.snake[i], sx=g.ox+s.x*CELL, sy=g.oy+s.y*CELL;
+    rr(sx+2,sy+2,CELL-4,CELL-4,9); ctx.fillStyle=i===0?"#b9c23c":(i%2?"#8f9a2a":"#a3ad30"); ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke();
+    if(i===0){ ctx.fillStyle="#000"; var ex=g.dir.x, ey=g.dir.y;
+      ctx.beginPath(); ctx.arc(sx+CELL/2+ex*6-ey*7,sy+CELL/2+ey*6-ex*7,3.5,0,6.283); ctx.arc(sx+CELL/2+ex*6+ey*7,sy+CELL/2+ey*6+ex*7,3.5,0,6.283); ctx.fill(); }
+  }
+  hudBand(); hearts(g.lives); if(g.cur) hudCenter("PLURAL OF:  "+g.cur.s.toUpperCase(),"#f2b33d"); hudRight(g.got+" / "+g.goal);
+}
+
+/* ===================== LEVEL 3: GROUP GALLERY ===================== */
+function newL3(){
+  var rounds=shuffle(GROUPS).slice(0,7).map(function(x){return {kind:"group",it:x};}).concat(shuffle(VERBS).slice(0,3).map(function(x){return {kind:"verb",it:x};}));
+  rounds=shuffle(rounds);
+  var g={lives:3,score:0,rounds:rounds,ri:-1,targets:[],timer:0,limit:10,shotFx:null};
+  l3Next(g); return g;
+}
+function l3Next(g){
+  g.ri++; if(g.ri>=g.rounds.length){ g.targets=[]; g.winAt=.6; return; }
+  var r=g.rounds[g.ri], words;
+  if(r.kind==="group"){ var ex=r.it.x||[]; var others=shuffle(GROUPS.filter(function(x){return x.a!==r.it.a && ex.indexOf(x.a)<0 && (x.x||[]).indexOf(r.it.a)<0;})).slice(0,3).map(function(x){return x.a;}); words=shuffle([r.it.a].concat(others)); r.ans=r.it.a; }
+  else { words=shuffle(["is","are"]); r.ans="is"; }
+  var laneY=[HUD+(CH-HUD)*.47, HUD+(CH-HUD)*.79];
+  g.targets=words.map(function(w,i){ var lane=i%2, slot=Math.floor(i/2), n=Math.ceil(words.length/2);
+    return {w:w,lane:lane,x:(slot+ .5)*(CW/n)+(lane?CW/(n*2):0),y:laneY[lane],dir:lane?-1:1,hit:0}; });
+  g.limit=Math.max(7,10-g.ri*.3); g.timer=g.limit; g.speed=70+g.ri*9;
+}
+function l3Update(g,dt){
+  if(g.winAt!=null){ g.winAt-=dt; if(g.winAt<=0) endLevel(true,'You matched every group. A collective noun is ONE group, so it takes a singular verb.'); return; }
+  if(g.shotFx){ g.shotFx.t-=dt; if(g.shotFx.t<=0) g.shotFx=null; }
+  if(g.adv!=null){ g.adv-=dt; if(g.adv<=0){ g.adv=null; l3Next(g); } return; }
+  g.targets.forEach(function(t){ t.x+=t.dir*g.speed*dt; if(t.x>CW+70) t.x=-70; if(t.x<-70) t.x=CW+70; });
+  g.timer-=dt;
+  if(g.timer<=0){ g.lives--; var r=g.rounds[g.ri];
+    feedback("Time's up!",l3Explain(r,null),function(){ if(g.lives<=0) endLevel(false,'A flock of birds, a herd of cows, a team of players. And remember: the team IS ready.'); else l3Next(g); },function(){ g.timer=g.limit; }); }
+}
+function l3Explain(r,wrong){
+  if(r.kind==="group") return (wrong?'<b>'+wrong+'</b> is not right here. ':'')+'A group of '+r.it.g+' is a <b>'+r.it.a+'</b>.'+(wrong&&GROUPS.some(function(x){return x.a===wrong;})?' A '+wrong+' is a group of '+GROUPS.filter(function(x){return x.a===wrong;})[0].g+'.':'');
+  return '<b>'+r.it.c+'</b> is a collective noun: ONE group. One group takes a singular verb, so the sentence is: <b>'+r.it.v.replace("___","is")+'</b>';
+}
+function l3Tap(x,y){
+  var g=G[3]; if(g.state!=="play"||paused||g.adv!=null||g.winAt!=null) return;
+  for(var i=0;i<g.targets.length;i++){
+    var t=g.targets[i]; if(Math.hypot(x-t.x,y-t.y)>52) continue;
+    var r=g.rounds[g.ri]; g.shotFx={x:t.x,y:t.y,t:.2}; beep("shot");
+    if(t.w===r.ans){ t.hit=1; var pts=10+Math.round(g.timer*2); g.score+=pts; addScore(pts); burst(t.x,t.y,"#6fd35a",18); floatText("+"+pts,t.x,t.y-60,"#6fd35a"); g.adv=.6; }
+    else { g.lives--; t.hit=-1; burst(t.x,t.y,"#e5533d",12);
+      feedback(pick(BAD),l3Explain(r,t.w),function(){ t.hit=0; if(g.lives<=0) endLevel(false,'A flock of birds, a herd of cows, a team of players. And remember: the team IS ready.'); },function(){ t.hit=0; }); }
+    return;
+  }
+}
+function l3Draw(g){
+  ctx.fillStyle="#2a1f14"; ctx.fillRect(0,0,CW,CH);
+  ctx.fillStyle="#3a2b1b"; for(var x=0;x<CW;x+=40) ctx.fillRect(x,HUD,20,CH-HUD);
+  var r=g.rounds[Math.max(0,Math.min(g.ri,g.rounds.length-1))];
+  // prompt
+  var py=HUD+(CH-HUD)*.17;
+  rr(30,py-34,CW-60,68,14); ctx.fillStyle="#120d08"; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle="#f2b33d"; ctx.stroke();
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  if(r.kind==="group"){ var em=r.it.e+r.it.e+r.it.e; ctx.font="30px \"Segoe UI Emoji\",\"Apple Color Emoji\",\"Noto Color Emoji\",sans-serif"; ctx.fillText(em,150,py+2);
+    var fz=26, txt="A group of "+r.it.g+" is a . . ."; ctx.font=bodyFont(fz); while(ctx.measureText(txt).width>CW-60-220-20&&fz>16){fz--;ctx.font=bodyFont(fz);} ctx.fillStyle="#fbf3e4"; ctx.textAlign="left"; ctx.fillText(txt,250,py+1); }
+  else { var vf=28, vt=r.it.v.replace("___","_____"); ctx.font=bodyFont(vf); while(ctx.measureText(vt).width>CW-90&&vf>16){vf--;ctx.font=bodyFont(vf);} ctx.fillStyle="#fbf3e4"; ctx.fillText(vt,CW/2,py+1); }
+  // lanes
+  [HUD+(CH-HUD)*.47, HUD+(CH-HUD)*.79].forEach(function(y){ ctx.fillStyle="#120d08"; ctx.fillRect(0,y+46,CW,8); });
+  g.targets.forEach(function(t){
+    if(t.hit===1) ctx.globalAlpha=.5;
+    var cols=t.hit===-1?["#e5533d","#fff","#e5533d"]:t.hit===1?["#6fd35a","#fff","#6fd35a"]:["#e07a2e","#fbf3e4","#e07a2e"];
+    ctx.fillStyle="#000"; ctx.beginPath(); ctx.arc(t.x+3,t.y+4,48,0,6.283); ctx.fill();
+    [48,36,24].forEach(function(rad,i){ ctx.beginPath(); ctx.arc(t.x,t.y,rad,0,6.283); ctx.fillStyle=cols[i]; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke(); });
+    ctx.fillStyle="#5a3f22"; ctx.fillRect(t.x-4,t.y+46,8,10);
+    var fz=20; ctx.font=font(fz); while(ctx.measureText(t.w.toUpperCase()).width>118&&fz>13){fz--;ctx.font=font(fz);}
+    var tw=ctx.measureText(t.w.toUpperCase()).width+18;
+    rr(t.x-tw/2,t.y-15,tw,30,8); ctx.fillStyle="#120d08"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke();
+    ctx.fillStyle="#f2b33d"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(t.w.toUpperCase(),t.x,t.y+1);
+    ctx.globalAlpha=1;
+  });
+  if(g.shotFx){ ctx.strokeStyle="#fff"; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(g.shotFx.x,g.shotFx.y,58*(1-g.shotFx.t/.2)+10,0,6.283); ctx.stroke(); }
+  hudBand(); hearts(g.lives);
+  var tw2=220, frac=Math.max(0,g.timer/g.limit); rr(CW/2-tw2/2,HUD/2-8,tw2,16,8); ctx.fillStyle="#3d2f20"; ctx.fill();
+  if(frac>0){ rr(CW/2-tw2/2,HUD/2-8,tw2*frac,16,8); ctx.fillStyle=frac<.3?"#e5533d":"#f2b33d"; ctx.fill(); }
+  hudRight("ROUND "+Math.min(g.ri+1,g.rounds.length)+" / "+g.rounds.length);
+}
+
+/* ===================== LOOP ===================== */
+var last=performance.now();
+function frame(now){
+  var dt=Math.min(.05,(now-last)/1000); last=now; var g=G[level];
+  if(g.state==="play"&&!paused){
+    if(g.winAt!=null&&level===1){ g.winAt-=dt; if(g.winAt<=0) endLevel(true,'You whacked plurals, singulars and collectives. Singular = one, plural = more than one, collective = one group.'); }
+    else if(level===1) l1Update(g,dt); else if(level===2) l2Update(g,dt); else l3Update(g,dt);
+    stepFx(dt);
+  }
+  ctx.clearRect(0,0,CW,CH);
+  if(g.state==="intro"){ var gr=ctx.createLinearGradient(0,0,0,CH); gr.addColorStop(0,"#241a10"); gr.addColorStop(1,"#120d08"); ctx.fillStyle=gr; ctx.fillRect(0,0,CW,CH); }
+  else { if(level===1) l1Draw(g); else if(level===2) l2Draw(g); else l3Draw(g); drawFx(); }
+  requestAnimationFrame(frame);
+}
+
+/* ===================== INPUT ===================== */
+function toCanvas(e){ var r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*CW/r.width, y:(e.clientY-r.top)*CH/r.height}; }
+cv.addEventListener("pointerdown",function(e){
+  e.preventDefault(); var p=toCanvas(e);
+  if(level===1) l1Tap(p.x,p.y); else if(level===2) l2Tap(p.x,p.y); else l3Tap(p.x,p.y);
+});
+document.addEventListener("keydown",function(e){
+  if($("#title")){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); $("#playnow").click(); } return; }
+  var b=$(".ov .btn",stage); if(b&&(e.key==="Enter"||e.key===" ")){ e.preventDefault(); b.click(); return; }
+  if(e.key==="?"){ showHelp(); return; }
+  if(e.key===" "||e.key==="Enter"){ e.preventDefault(); return; }
+  if(level===2){ var k=e.key;
+    if(k==="ArrowUp"||k==="w"||k==="W"){ e.preventDefault(); l2Dir(0,-1); } if(k==="ArrowDown"||k==="s"||k==="S"){ e.preventDefault(); l2Dir(0,1); }
+    if(k==="ArrowLeft"||k==="a"||k==="A"){ e.preventDefault(); l2Dir(-1,0); } if(k==="ArrowRight"||k==="d"||k==="D"){ e.preventDefault(); l2Dir(1,0); } }
+});
+
+/* ===================== NAV ===================== */
+function go(lv){
+  if(pendingCb){ var f=pendingCb, sk=pendingSkip; pendingCb=null; pendingSkip=null;
+    if(G[level].lives<=0) f(); else if(sk) sk(); }
+  var g=G[level]; if(g.state==="play") g.state="paused";
+  closeOverlay(); paused=false; level=lv;
+  $$(".tab").forEach(function(t){ var on=+t.getAttribute("data-l")===lv; t.classList.toggle("active",on); t.setAttribute("aria-selected",on); });
+  infoCard();
+}
+$$(".tab").forEach(function(t){ t.addEventListener("click",function(){ beep("tap"); t.blur(); go(+t.getAttribute("data-l")); }); });
+$("#help").addEventListener("click",function(){ this.blur(); showHelp(); });
+$("#mute").addEventListener("click",function(){ soundOn=!soundOn; this.textContent=soundOn?"🔊":"🔇"; this.blur(); });
+$("#playnow").addEventListener("click",function(){ beep("win"); var t=$("#title"); t.classList.add("hide"); setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },300); });
+document.addEventListener("visibilitychange",function(){ if(document.hidden&&G[level].state==="play"&&!paused) infoCard(); });
+
+/* ===================== FIT TO BOX ===================== */
+var lastW=-1,lastH=-1;
+function fit(){
+  var a=$("#app"), de=document.documentElement, W=de.clientWidth||window.innerWidth, H=de.clientHeight||window.innerHeight;
+  if(!W||!H||(W===lastW&&H===lastH)) return; lastW=W; lastH=H;
+  var k=Math.min(W/800,H/500); a.style.transform="scale("+k+")"; a.style.left=((W-800*k)/2)+"px"; a.style.top=((H-500*k)/2)+"px";
+}
+window.addEventListener("resize",fit); window.addEventListener("load",fit); window.addEventListener("pageshow",fit);
+try{ new ResizeObserver(fit).observe(document.documentElement); }catch(e){}
+setInterval(fit,400); fit();
+
+sizeCanvas(); go(1); requestAnimationFrame(frame);
+window.__G=function(){ return {level:level,G:G,paused:paused,CW:CW,CH:CH,CELL:CELL}; };
+})();
+</script>
+</body>
+</html>
