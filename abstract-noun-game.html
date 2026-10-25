@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Mr. Markuss's Grammar Rap Interactive Workbook: Abstract Nouns</title>
+<style>
+:root{
+  --bg:#17110b;--panel:#221a12;--panel2:#2e2318;--ink:#fbf3e4;--muted:#c9b89c;
+  --gold:#f2b33d;--orange:#e07a2e;--olive:#b9c23c;--green:#6fd35a;--red:#e5533d;--line:#3d2f20;
+  --display:"Arial Black","Arial Bold",Impact,"Helvetica Neue",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+body{font-family:var(--display);font-weight:900}
+button{font-family:inherit;font-weight:inherit;touch-action:manipulation;color:inherit}
+/* Fixed 800x500 design canvas, scaled to fit whatever box Heyzine gives it */
+#app{position:absolute;left:0;top:0;width:800px;height:500px;transform-origin:0 0;display:flex;flex-direction:column;gap:10px;padding:10px 12px 12px;
+  background:radial-gradient(circle at 1px 1px,rgba(255,240,210,.06) 1px,transparent 0) 0 0/14px 14px,var(--bg)}
+
+/* top bar */
+header{height:56px;display:flex;align-items:center;gap:10px}
+.logo{font-size:22px;letter-spacing:.5px;color:var(--gold);transform:skew(-7deg);text-shadow:2px 2px 0 var(--orange),4px 4px 0 #000;white-space:nowrap;line-height:1}
+.logo small{display:block;font-family:var(--body);font-weight:800;font-size:12px;letter-spacing:2px;color:var(--olive);text-shadow:none;margin-top:4px}
+nav.tabs{flex:1;display:flex;gap:6px;justify-content:center}
+.tab{background:var(--panel);border:3px solid #000;border-radius:12px;padding:0 10px;height:48px;cursor:pointer;font-size:15px;box-shadow:3px 3px 0 #000;white-space:nowrap}
+.tab span{color:var(--gold)}
+.tab.active{background:var(--gold);color:#1a120a;box-shadow:3px 3px 0 var(--orange)}
+.tab.active span{color:#1a120a}
+.tab:active{transform:translate(2px,2px)}
+.chip{background:var(--panel);border:3px solid #000;border-radius:12px;height:48px;display:flex;align-items:center;padding:0 10px;font-size:17px;white-space:nowrap;min-width:96px;justify-content:center}
+.chip b{color:var(--gold);margin-left:6px}
+.iconbtn{background:var(--panel);border:3px solid #000;border-radius:12px;width:48px;height:48px;cursor:pointer;font-size:22px}
+
+/* stage */
+#stage{position:relative;flex:1;min-height:0;background:var(--panel);border:3px solid #000;border-radius:18px;
+  box-shadow:5px 5px 0 #000,inset 0 0 0 2px var(--line);overflow:hidden;display:flex;flex-direction:column;padding:12px 14px 14px;gap:8px}
+.prog{display:flex;gap:5px;justify-content:center}
+.prog i{flex:1;max-width:44px;height:8px;border-radius:4px;background:#3d2f20}
+.prog i.done{background:var(--green)} .prog i.now{background:var(--gold)}
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:0;text-align:center}
+.ask{font-family:var(--body);font-weight:800;color:var(--muted);font-size:17px;letter-spacing:2px;text-transform:uppercase}
+.word{font-size:88px;line-height:1;text-transform:uppercase;color:#fff;text-shadow:4px 4px 0 var(--orange),8px 8px 0 #000;transform:rotate(-2deg)}
+.senses{font-family:var(--body);font-weight:800;font-size:19px;color:var(--muted)}
+.sentence{font-family:var(--body);font-weight:800;font-size:36px;line-height:1.35;max-width:740px}
+.sentence mark{background:var(--gold);color:#1a120a;padding:0 10px;border-radius:8px;box-shadow:3px 3px 0 var(--orange);white-space:nowrap}
+.sentence s{color:var(--red);text-decoration-thickness:4px}
+.sentence .blank{display:inline-block;min-width:100px;border-bottom:5px solid var(--gold);color:var(--gold);margin:0 6px}
+.pop{animation:pop .28s cubic-bezier(.2,1.6,.4,1)}
+.sentence.pop{animation:pops .25s ease-out}
+
+/* choices */
+.choices{display:grid;gap:10px}
+.choices.two{grid-template-columns:1fr 1fr}
+.choices.four{grid-template-columns:1fr 1fr}
+.choices.three{grid-template-columns:repeat(3,1fr)}
+.choice{position:relative;font-weight:900;background:var(--panel2);border:3px solid #000;border-radius:14px;box-shadow:4px 4px 0 #000;
+  padding:8px;cursor:pointer;min-height:76px;font-size:30px;line-height:1.05;transition:transform .08s,background .15s}
+.choices.two .choice{min-height:104px;font-size:40px}
+.choice small{display:block;font-family:var(--body);font-weight:800;font-size:17px;color:var(--muted);margin-top:4px}
+.choice.c{color:var(--orange)} .choice.a{color:var(--olive)}
+.choice .k{position:absolute;top:5px;left:9px;font-size:13px;color:#7d6a50;font-family:var(--body)}
+.choice:hover{background:#3a2c1e}
+.choice:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
+.choice.right{background:var(--green);color:#0d3305}
+.choice.wrong{background:var(--red);color:#fff;animation:shake .35s}
+.choice.right small,.choice.wrong small{color:inherit}
+.choice:disabled{cursor:default}
+
+/* sprint */
+.sprintbar{display:flex;align-items:center;gap:10px}
+.timer{flex:1;height:16px;background:#3d2f20;border-radius:8px;overflow:hidden;border:3px solid #000}
+.timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--orange),var(--gold))}
+.timer.low i{background:var(--red)}
+.secs{font-size:24px;min-width:56px;text-align:right}
+.combo{font-size:20px;background:var(--orange);color:#fff;border:3px solid #000;border-radius:10px;padding:2px 10px;box-shadow:2px 2px 0 #000}
+
+/* cards (intro / end / help / pause) */
+.card{max-width:700px}
+.big{font-size:50px;color:var(--gold);text-shadow:3px 3px 0 var(--orange),6px 6px 0 #000;transform:skew(-6deg);margin-bottom:8px}
+.copy{font-family:var(--body);font-weight:700;font-size:23px;line-height:1.4;color:#f3e8d4}
+.copy b{color:var(--gold)}
+.stats{display:flex;gap:12px;justify-content:center;margin:8px 0}
+.stat{background:var(--panel2);border:3px solid #000;border-radius:12px;padding:6px 18px;box-shadow:3px 3px 0 #000;min-width:150px}
+.stat b{display:block;font-size:38px;color:var(--olive)}
+.stat small{font-family:var(--body);font-weight:800;font-size:15px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.row{display:flex;gap:12px;justify-content:center;margin-top:12px}
+.btn{background:var(--gold);color:#1a120a;border:3px solid #000;border-radius:14px;box-shadow:4px 4px 0 #000;padding:12px 26px;cursor:pointer;font-size:24px}
+.btn.alt{background:var(--panel2);color:var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
+
+/* overlays */
+.fb,.help{position:absolute;inset:0;background:rgba(10,6,2,.92);display:flex;align-items:center;justify-content:center;padding:16px;z-index:5;animation:fade .15s}
+.fb-in{width:100%;background:#120d08;border:4px solid var(--red);border-radius:18px;box-shadow:5px 5px 0 #000;padding:16px 20px;animation:up .2s ease-out;text-align:left}
+.fb.good .fb-in{border-color:var(--green)}
+.help .fb-in{border-color:var(--gold)}
+.fb-t{font-size:36px;color:var(--red);display:inline-block;transform:skew(-6deg)}
+.fb.good .fb-t{color:var(--green)} .help .fb-t{color:var(--gold)}
+.fb-b{font-family:var(--body);font-weight:700;font-size:26px;line-height:1.38;margin:6px 0 14px;color:#f6ecd9}
+.fb-b b{color:var(--gold)}
+.fb-btn{background:var(--gold);color:#1a120a;border:3px solid #000;border-radius:12px;box-shadow:3px 3px 0 #000;padding:10px 24px;cursor:pointer;font-size:24px}
+.fb-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+.float{position:absolute;right:22px;top:14px;font-size:32px;color:var(--green);text-shadow:2px 2px 0 #000;animation:floatup .7s ease-out forwards;pointer-events:none;z-index:4}
+
+@keyframes pop{0%{transform:scale(.6) rotate(-6deg);opacity:0}100%{transform:scale(1) rotate(-2deg);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes pops{0%{transform:scale(.85);opacity:0}100%{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes floatup{from{transform:translateY(0);opacity:1}to{transform:translateY(-36px);opacity:0}}
+/* title screen */
+#title{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;
+  background:radial-gradient(ellipse at 50% 40%,rgba(224,122,46,.22),transparent 60%),radial-gradient(circle at 1px 1px,rgba(255,240,210,.07) 1px,transparent 0) 0 0/14px 14px,var(--bg)}
+#title.hide{animation:titleout .3s ease-in forwards}
+.t-kicker{font-family:var(--body);font-weight:800;font-size:18px;letter-spacing:5px;color:var(--olive);text-transform:uppercase}
+.t-name{font-size:96px;line-height:.95;color:var(--gold);transform:skew(-7deg) rotate(-2deg);text-shadow:5px 5px 0 var(--orange),10px 10px 0 #000;margin:10px 0 6px;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.t-kicker{font-size:22px!important}
+.t-mid{font-size:26px;letter-spacing:6px;color:var(--olive);margin-bottom:10px}
+.t-sub{font-size:30px;color:var(--ink);letter-spacing:2px;text-shadow:3px 3px 0 #000}
+.t-levels{display:flex;gap:10px;margin:16px 0 18px}
+.t-levels div{background:var(--panel2);border:3px solid #000;border-radius:12px;box-shadow:3px 3px 0 #000;padding:8px 14px;font-size:17px}
+.t-levels span{color:var(--gold)}
+#playnow{font-size:38px;padding:16px 46px;border-radius:18px;box-shadow:6px 6px 0 #000;animation:pulse 1.6s ease-in-out infinite}
+#playnow:active{transform:translate(4px,4px);box-shadow:2px 2px 0 #000}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes titleout{to{opacity:0;transform:scale(1.04)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">GRAMMAR RAP<small>ABSTRACT NOUNS</small></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" data-l="1" role="tab"><span>1</span> SENSE TEST</button>
+      <button class="tab" data-l="2" role="tab"><span>2</span> JOB SWITCH</button>
+      <button class="tab" data-l="3" role="tab"><span>3</span> FIX-IT</button>
+    </nav>
+    <div class="chip">PTS<b id="score">0</b></div>
+    <button class="iconbtn" id="help" aria-label="How to play" title="Rule">?</button>
+    <button class="iconbtn" id="mute" aria-label="Toggle sound" title="Sound">🔊</button>
+  </header>
+  <main id="stage" aria-live="polite"></main>
+  <div id="title" role="dialog" aria-label="Mr. Markuss's Grammar Rap Interactive Workbook title screen">
+    <div class="t-kicker">Mr. Markuss's</div>
+    <div class="t-name">GRAMMAR RAP</div>
+    <div class="t-mid">INTERACTIVE WORKBOOK</div>
+    <div class="t-sub">ABSTRACT NOUNS</div>
+    <div class="t-levels"><div><span>1</span> SENSE TEST</div><div><span>2</span> JOB SWITCH</div><div><span>3</span> FIX-IT</div></div>
+    <button class="btn" id="playnow">PLAY NOW</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== CONTENT ===================== */
+// Level 1: t = A (abstract) or C (concrete)
+var L1_POOL = [
+  {w:"courage",t:"A",n:"You can SEE a brave move, but you can't pick up a pound of courage."},
+  {w:"freedom",t:"A",n:"You can't stuff freedom in a backpack. It's an idea — a state of being."},
+  {w:"loyalty",t:"A",n:"Loyalty shows up in what people do, but nobody has ever tasted it."},
+  {w:"respect",t:"A",n:"You give it and you earn it, but you can't hold it. Respect is an idea."},
+  {w:"happiness",t:"A",n:"The smile is concrete. The happiness behind the smile? Abstract."},
+  {w:"jealousy",t:"A",n:"Jealousy is a feeling. You can see what jealousy makes people do, but never the jealousy itself."},
+  {w:"friendship",t:"A",n:"Your friend is concrete. The friendship between you is abstract."},
+  {w:"honesty",t:"A",n:"Honesty is a quality. Nobody has ever smelled honesty."},
+  {w:"patience",t:"A",n:"Patience is a quality. You can wait patiently, but you cannot touch patience."},
+  {w:"confidence",t:"A",n:"You can see the walk. You can't see the confidence powering it."},
+  {w:"knowledge",t:"A",n:"The book is concrete. The knowledge in your head is abstract."},
+  {w:"childhood",t:"A",n:"Childhood is a stage of life — a time period, not a thing you can hold."},
+  {w:"justice",t:"A",n:"The courthouse is concrete. Justice is the idea it's supposed to stand for."},
+  {w:"hope",t:"A",n:"Hope is a feeling. Zero of your five senses can catch it."},
+  {w:"wisdom",t:"A",n:"Your grandmother is concrete. Her wisdom is abstract."},
+  {w:"trust",t:"A",n:"Trust gets built and broken, but never seen, heard, smelled, tasted, or touched."},
+  {w:"shame",t:"A",n:"The blush is concrete. The shame behind it is a feeling — abstract."},
+  {w:"curiosity",t:"A",n:"Curiosity is a quality of the mind. No sense can detect it."},
+  {w:"kindness",t:"A",n:"The snack you shared is concrete. The kindness of sharing it is abstract."},
+  {w:"fear",t:"A",n:"Goosebumps are concrete. The fear causing them is abstract."},
+  {w:"talent",t:"A",n:"You can see a great performance. You can't see the talent itself."},
+  {w:"success",t:"A",n:"The diploma is concrete. Success is the idea it represents."},
+  {w:"intelligence",t:"A",n:"Your notes from page 6: intelligence is a TRAIT the student has. You can't hold it — abstract."},
+  {w:"beauty",t:"A",n:"You can see a beautiful sunset, but beauty itself is a quality. Abstract."},
+  {w:"anger",t:"A",n:"Red face and slammed doors are concrete. The anger behind them is a feeling — abstract."},
+  {w:"loneliness",t:"A",n:"Loneliness is something felt. You can see someone sitting alone, but not the loneliness. Abstract."},
+  {w:"ignorance",t:"A",n:"Ignorance is a trait (not knowing). No sense can catch it. Abstract."},
+  {w:"creativity",t:"A",n:"The painting is concrete. The creativity that made it is abstract."},
+  {w:"sneakers",t:"C",n:"You can see them and touch them. Concrete."},
+  {w:"pizza",t:"C",n:"See it, smell it, taste it. Concrete."},
+  {w:"microphone",t:"C",n:"You can pick up a microphone and hold it. Concrete."},
+  {w:"thunder",t:"C",n:"Tricky one! You can't see or hold thunder, but you can HEAR it. One sense is enough — concrete."},
+  {w:"perfume",t:"C",n:"You can SMELL it from across the room. One sense = concrete."},
+  {w:"wind",t:"C",n:"Tricky one! You can't see wind, but you can FEEL it on your face. Touch counts — concrete."},
+  {w:"echo",t:"C",n:"Tricky one! Invisible, but you can HEAR an echo. Concrete."},
+  {w:"hoodie",t:"C",n:"You can see it and touch it. Concrete."},
+  {w:"honey",t:"C",n:"You can taste it AND touch it (sticky). Concrete."},
+  {w:"trophy",t:"C",n:"You can hold a trophy. The pride you feel is abstract — the trophy itself is concrete."},
+  {w:"teacher",t:"C",n:"People are concrete. You can see and hear your teacher."},
+  {w:"siren",t:"C",n:"You can hear a siren from blocks away. Concrete."},
+  {w:"smoke",t:"C",n:"You can see it and smell it. Concrete."}
+];
+
+// Level 2: a = abstract | concrete | verb | adjective
+var L2_POOL = [
+  {s:"Her [honesty] saved the whole group project.",a:"abstract",y:"<b>Honesty</b> is the THING she has — a quality. It's a noun, and no sense can catch it. Abstract noun."},
+  {s:"I [trust] you with my phone.",a:"verb",y:"Here <b>trust</b> is the action I'm doing. Same word, different job — it's a verb in this sentence."},
+  {s:"[Trust] takes years to build and seconds to break.",a:"abstract",y:"Now <b>trust</b> is the THING being built and broken. Noun — and an invisible one. Abstract noun."},
+  {s:"She was [brave] on that stage.",a:"adjective",y:"<b>Brave</b> describes her. Describers are adjectives. The abstract noun version is <b>bravery</b>."},
+  {s:"Her [bravery] on that stage was impressive.",a:"abstract",y:"<b>Bravery</b> is the quality itself — a thing, not a describer. Abstract noun."},
+  {s:"He [hopes] the bus is running late.",a:"verb",y:"<b>Hopes</b> is what he's DOING. Action word = verb."},
+  {s:"[Hope] kept the team going in the fourth quarter.",a:"abstract",y:"<b>Hope</b> is the thing doing the keeping. It's a noun — a feeling no sense can catch. Abstract."},
+  {s:"The teacher admired the student's [intelligence].",a:"abstract",y:"Straight from page 6: <b>intelligence</b> is a TRAIT the student has. It's the thing being admired — abstract noun."},
+  {s:"The teacher enjoyed the [intelligent] student.",a:"adjective",y:"Page 6 rule: <b>intelligent</b> DESCRIBES the student. Don't confuse the thing with the word that describes the thing!"},
+  {s:"Her [creativity] turned a cardboard box into a stage.",a:"abstract",y:"<b>Creativity</b> is a quality she has — the thing doing the work. Abstract noun."},
+  {s:"That was a [creative] idea.",a:"adjective",y:"<b>Creative</b> describes the idea. Adjective. The abstract noun is <b>creativity</b>."},
+  {s:"The [crowd] went quiet when the music started.",a:"concrete",y:"You can see and hear a <b>crowd</b>. It's a noun your senses can catch — concrete."},
+  {s:"I [love] this song.",a:"verb",y:"<b>Love</b> is the action here — what I do to the song. Verb."},
+  {s:"[Love] can take a lot of patience.",a:"abstract",y:"Now <b>love</b> is the THING the sentence is about. Noun, feeling, invisible — abstract."},
+  {s:"My grandmother's [kitchen] smells like fresh bread.",a:"concrete",y:"You can walk into a <b>kitchen</b> and smell it. Concrete noun."},
+  {s:"Her [kindness] made my whole week.",a:"abstract",y:"<b>Kindness</b> is the quality that did the work. Noun, can't be sensed — abstract."},
+  {s:"Stop being so [jealous] of his new shoes.",a:"adjective",y:"<b>Jealous</b> describes a person. Adjective. The abstract noun is <b>jealousy</b>."},
+  {s:"The [freedom] to choose your own path is important.",a:"abstract",y:"<b>Freedom</b> is the thing being talked about — an idea. Abstract noun."},
+  {s:"They [fear] the final exam.",a:"verb",y:"<b>Fear</b> is what they're DOING here. Verb. (Next time it might be a noun — check the job!)"},
+  {s:"Coach praised our [effort] in practice.",a:"abstract",y:"<b>Effort</b> is the thing Coach praised. You see the sweat, not the effort itself. Abstract noun."},
+  {s:"We are [free] after the last bell.",a:"adjective",y:"<b>Free</b> describes us. Adjective. Add <b>-dom</b> and it becomes the abstract noun <b>freedom</b>."},
+  {s:"The [trophy] sat on the shelf collecting dust.",a:"concrete",y:"You can see and touch a <b>trophy</b>. Concrete noun."}
+];
+var L2_HINT = {
+  verb:"Check its JOB. Is somebody DOING this word in the sentence? Try putting <b>the</b> in front of it — if that sounds broken, it's not acting like a noun here.",
+  adjective:"Check its JOB. Is it describing somebody or something? Abstract nouns are THINGS (<b>bravery</b>), not describers (<b>brave</b>).",
+  abstract:"Check its JOB. It's a THING in this sentence — you could put <b>the</b>, <b>her</b>, or <b>our</b> in front of it. Now run the Sense Check: can any of your five senses catch it?",
+  concrete:"It's a THING here, so it's a noun — but run the Sense Check. Could you see, hear, smell, taste, or touch it?"
+};
+var L2_LABEL = {abstract:"an abstract noun",concrete:"a concrete noun",verb:"a verb",adjective:"an adjective"};
+
+// Level 3: fix the broken word with the correct abstract noun
+var L3_POOL = [
+  {s:"The [excite] in the gym was easy to feel.",o:["excitement","exciting","excited"],a:"excitement",h:"You need a THING — the feeling itself. <b>-ing</b> and <b>-ed</b> words describe. Which ending turns a word into a noun?"},
+  {s:"Her [kind] changed my whole day.",o:["kindness","kindly","kinder"],a:"kindness",h:"<b>-ly</b> words describe actions and <b>-er</b> words compare. You need the quality itself. Think <b>-ness</b>."},
+  {s:"We marched for our [free].",o:["freedom","freely","freer"],a:"freedom",h:"\"Our ___\" needs a noun. <b>-ly</b> describes how; <b>-er</b> compares. One ending builds an idea out of free."},
+  {s:"His [brave] inspired the whole team.",o:["bravery","bravely","braver"],a:"bravery",h:"\"His ___\" needs a THING he has. Describers and comparers can't fill that spot."},
+  {s:"[Patient] is a skill you build.",o:["Patience","Patiently","Patients"],a:"Patience",h:"Watch out: <b>patients</b> are people in a hospital — concrete! You need the quality you build. Listen closely: they sound alike."},
+  {s:"She showed real [loyal] to her friends.",o:["loyalty","loyally","loyalist"],a:"loyalty",h:"A <b>loyalist</b> is a PERSON — concrete. <b>-ly</b> describes how. You need the quality she showed."},
+  {s:"I respect your [honest].",o:["honesty","honestly","dishonest"],a:"honesty",h:"\"Your ___\" needs a noun. <b>Honestly</b> describes how; <b>dishonest</b> describes a person. Which one is the quality?"},
+  {s:"The [happy] in that room was contagious.",o:["happiness","happily","happier"],a:"happiness",h:"\"The ___ was contagious\" — you need a THING. Not a describer, not a comparer. Think <b>-ness</b>."},
+  {s:"Your [decide] changes everything.",o:["decision","decisive","decided"],a:"decision",h:"\"Your ___\" needs a noun. <b>Decisive</b> and <b>decided</b> describe. Which one is the thing you made?"},
+  {s:"We need more [create] in this class.",o:["creativity","creative","creatively"],a:"creativity",h:"\"More ___\" needs a THING. <b>Creative</b> describes and <b>creatively</b> describes how."},
+  {s:"She spoke with real [confident].",o:["confidence","confidently","confidant"],a:"confidence",h:"Watch out: a <b>confidant</b> is a trusted PERSON — concrete. You need the feeling she spoke with."},
+  {s:"True [friend] lasts a lifetime.",o:["friendship","friendly","friends"],a:"friendship",h:"<b>Friends</b> are people — concrete. <b>Friendly</b> describes. You need the BOND. Which ending builds a relationship?"},
+  {s:"My [child] was full of happy memories.",o:["childhood","childish","children"],a:"childhood",h:"<b>Children</b> are people — concrete. <b>Childish</b> describes. You need the TIME of life. Think <b>-hood</b>."},
+  {s:"His [wise] surprised everybody.",o:["wisdom","wisely","wiser"],a:"wisdom",h:"\"His ___\" needs a quality he HAS. <b>-ly</b> describes how, <b>-er</b> compares."},
+  {s:"Her [curious] got her into trouble.",o:["curiosity","curiously","curiouser"],a:"curiosity",h:"\"Her ___\" needs a THING she has. <b>-ly</b> describes how, and <b>curiouser</b> compares. You need the trait itself."},
+  {s:"We celebrated our team's [succeed].",o:["success","successful","successfully"],a:"success",h:"\"Our team's ___\" needs a noun. <b>Successful</b> describes; <b>successfully</b> describes how."}
+];
+
+var GOOD = ["Correct!","That's right!","Well done!","Exactly!","Nice work!","You got it!"];
+var BAD  = ["Not quite.","Try again.","Almost.","Take another look."];
+var L1_N = 12, L2_N = 10, L3_TIME = 60;
+
+/* ===================== HELPERS ===================== */
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function mark(s,cls){return s.replace(/\[(.+?)\]/,cls)}
+function store(k,v){try{if(v===undefined){return window.localStorage.getItem(k)}window.localStorage.setItem(k,v)}catch(e){return null}}
+
+var stage = $("#stage");
+var level = 1, busy = false, soundOn = true, autoTimer = null, actx = null;
+var S = {1:null,2:null,3:null};
+
+function beep(kind){
+  if(!soundOn) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    var o=actx.createOscillator(), g=actx.createGain(), t=actx.currentTime;
+    o.connect(g); g.connect(actx.destination);
+    if(kind==="good"){o.type="square";o.frequency.setValueAtTime(660,t);o.frequency.setValueAtTime(990,t+0.08)}
+    else if(kind==="bad"){o.type="sawtooth";o.frequency.setValueAtTime(190,t);o.frequency.linearRampToValueAtTime(90,t+0.25)}
+    else if(kind==="win"){o.type="square";o.frequency.setValueAtTime(523,t);o.frequency.setValueAtTime(659,t+0.1);o.frequency.setValueAtTime(784,t+0.2);o.frequency.setValueAtTime(1046,t+0.3)}
+    else {o.type="triangle";o.frequency.setValueAtTime(520,t)}
+    var len = kind==="win"?0.5:0.3;
+    g.gain.setValueAtTime(0.07,t); g.gain.exponentialRampToValueAtTime(0.001,t+len);
+    o.start(t); o.stop(t+len+0.02);
+  }catch(e){}
+}
+
+function hud(score){ $("#score").textContent=score; }
+
+function progress(i,n){
+  var h="";for(var k=0;k<n;k++){h+='<i class="'+(k<i?"done":(k===i?"now":""))+'"></i>'}
+  return '<div class="prog" aria-label="Question '+(i+1)+' of '+n+'">'+h+'</div>';
+}
+
+function floatPts(txt){
+  var f=document.createElement("div"); f.className="float"; f.textContent=txt; stage.appendChild(f);
+  setTimeout(function(){ if(f.parentNode) f.parentNode.removeChild(f) },750);
+}
+
+function lockChoices(on){ $$(".choice",stage).forEach(function(b){b.disabled=on}); }
+
+function clearFeedback(){
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null}
+  var hp=$(".help",stage); if(hp) hp.parentNode.removeChild(hp);
+  var f=$(".fb",stage); if(f) f.parentNode.removeChild(f);
+}
+
+function feedback(good,title,body,btn,cb,autoMs){
+  clearFeedback();
+  var d=document.createElement("div");
+  d.className="fb "+(good?"good":"bad");
+  d.innerHTML='<div class="fb-in" role="alert"><div class="fb-t">'+title+'</div><div class="fb-b">'+body+'</div><button class="fb-btn">'+btn+'</button></div>';
+  stage.appendChild(d);
+  var done=false;
+  function go(){ if(done) return; done=true; clearFeedback(); cb(); }
+  $(".fb-btn",d).addEventListener("click",go);
+  if(autoMs){ autoTimer=setTimeout(go,autoMs); }
+  setTimeout(function(){ var b=$(".fb-btn",d); if(b) b.focus({preventScroll:true}); },50);
+}
+
+/* ===================== LEVEL 1 ===================== */
+function newL1(){ return {items:shuffle(L1_POOL).slice(0,L1_N),i:0,score:0,streak:0,first:0,missed:false} }
+
+function renderL1(){
+  var s=S[1]; busy=false; hud(s.score,s.streak);
+  if(s.i>=s.items.length) return renderEnd(1);
+  var it=s.items[s.i];
+  stage.innerHTML =
+    progress(s.i,s.items.length)+
+    '<div class="center"><div class="ask">Run the Sense Check</div><div class="word pop">'+it.w+'</div><div class="senses">👀 see · 👂 hear · 👃 smell · 👅 taste · ✋ touch</div></div>'+
+    '<div class="choices two">'+
+      '<button class="choice c" data-v="C"><span class="k">1</span>CONCRETE<small>my senses can catch it</small></button>'+
+      '<button class="choice a" data-v="A"><span class="k">2</span>ABSTRACT<small>felt, thought, or a trait</small></button>'+
+    '</div>';
+  $$(".choice",stage).forEach(function(b){ b.addEventListener("click",function(){ answerL1(b) }) });
+}
+
+function answerL1(btn){
+  if(busy) return; var s=S[1], it=s.items[s.i], v=btn.getAttribute("data-v");
+  busy=true; lockChoices(true);
+  if(v===it.t){
+    btn.classList.add("right"); beep("good");
+    var pts = s.missed?5:10; s.score+=pts; s.streak++; if(!s.missed) s.first++;
+    hud(s.score,s.streak); floatPts("+"+pts);
+    s.i++; s.missed=false;
+    feedback(true,pick(GOOD),'<b>'+cap(it.w)+'</b> is '+(it.t==="A"?"ABSTRACT":"CONCRETE")+'. '+it.n,"Next →",function(){ renderL1(); },2600);
+  } else {
+    btn.classList.add("wrong"); beep("bad");
+    s.missed=true; s.streak=0; hud(s.score,s.streak);
+    var body = it.t==="A"
+      ? 'Run the Sense Check on <b>'+it.w+'</b>: could you see it, hear it, smell it, taste it, or touch it? '+it.n
+      : 'Rule: if even ONE of your five senses can catch it, it\'s concrete. '+it.n;
+    feedback(false,pick(BAD),body,"Try again",function(){ renderL1(); });
+  }
+}
+function cap(w){return w.charAt(0).toUpperCase()+w.slice(1)}
+
+/* ===================== LEVEL 2 ===================== */
+function newL2(){ return {items:shuffle(L2_POOL).slice(0,L2_N),i:0,score:0,streak:0,first:0,missed:false} }
+
+function renderL2(){
+  var s=S[2]; busy=false; hud(s.score,s.streak);
+  if(s.i>=s.items.length) return renderEnd(2);
+  var it=s.items[s.i];
+  stage.innerHTML =
+    progress(s.i,s.items.length)+
+    '<div class="center"><div class="ask">What job does it do here?</div><div class="sentence pop">'+mark(it.s,'<mark>$1</mark>')+'</div></div>'+
+    '<div class="choices four">'+
+      '<button class="choice a" data-v="abstract"><span class="k">1</span>ABSTRACT NOUN</button>'+
+      '<button class="choice c" data-v="concrete"><span class="k">2</span>CONCRETE NOUN</button>'+
+      '<button class="choice" data-v="verb"><span class="k">3</span>VERB</button>'+
+      '<button class="choice" data-v="adjective"><span class="k">4</span>ADJECTIVE</button>'+
+    '</div>';
+  $$(".choice",stage).forEach(function(b){ b.addEventListener("click",function(){ answerL2(b) }) });
+}
+
+function answerL2(btn){
+  if(busy) return; var s=S[2], it=s.items[s.i], v=btn.getAttribute("data-v");
+  busy=true; lockChoices(true);
+  if(v===it.a){
+    btn.classList.add("right"); beep("good");
+    var pts=s.missed?5:10; s.score+=pts; s.streak++; if(!s.missed) s.first++;
+    hud(s.score,s.streak); floatPts("+"+pts);
+    s.i++; s.missed=false;
+    feedback(true,pick(GOOD),it.y,"Next →",function(){ renderL2(); });
+  } else {
+    btn.classList.add("wrong"); beep("bad");
+    s.missed=true; s.streak=0; hud(s.score,s.streak);
+    feedback(false,pick(BAD),'It\'s not '+L2_LABEL[v]+' in this sentence. '+L2_HINT[it.a],"Try again",function(){ renderL2(); });
+  }
+}
+
+/* ===================== LEVEL 3 ===================== */
+function newL3(){ return {phase:"intro",items:shuffle(L3_POOL),i:0,score:0,combo:1,streak:0,left:L3_TIME,last:0,tick:null,paused:false,opts:null,right:0} }
+
+function renderL3(){
+  var s=S[3]; busy=false; hud(s.score,s.streak);
+  if(s.phase==="intro"){
+    var best=parseInt(store("sensecheck_best")||"0",10)||0;
+    stage.innerHTML='<div class="center"><div class="card">'+
+      '<div class="big">60-SECOND FIX-IT</div>'+
+      '<p class="copy">Every sentence has a <b>broken word</b>. Pick the <b>abstract noun</b> that fixes it. Watch for words that SOUND right but name a person or object.<br><br>Right answers stack a <b>combo</b> up to ×5. Wrong answer? The clock freezes, you get the rule, then you fix it.</p>'+
+      (best?'<div class="stats"><div class="stat"><b>'+best+'</b><small>Your best</small></div></div>':'')+
+      '<div class="row"><button class="btn" id="go">START THE CLOCK</button></div>'+
+      '</div></div>';
+    $("#go").addEventListener("click",startSprint);
+    return;
+  }
+  if(s.phase==="done") return renderEnd(3);
+  if(s.paused){
+    stage.innerHTML='<div class="center"><div class="card"><div class="big">PAUSED</div><p class="copy">Clock is frozen at <b>'+Math.ceil(s.left)+'s</b>.</p><div class="row"><button class="btn" id="resume">RESUME</button><button class="btn alt" id="restart">RESTART</button></div></div></div>';
+    $("#resume").addEventListener("click",function(){ s.paused=false; drawSprint(); runClock(); });
+    $("#restart").addEventListener("click",function(){ S[3]=newL3(); startSprint(); });
+    return;
+  }
+  drawSprint(); runClock();
+}
+
+function startSprint(){ var s=S[3]; s.phase="play"; s.left=L3_TIME; s.i=0; s.score=0; s.combo=1; s.streak=0; s.right=0; s.items=shuffle(L3_POOL); s.opts=null; beep("tap"); drawSprint(); runClock(); }
+
+function drawSprint(){
+  var s=S[3]; busy=false; hud(s.score,s.streak);
+  if(s.i>=s.items.length){ return endSprint(); }
+  var it=s.items[s.i];
+  if(!s.opts) s.opts=shuffle(it.o);
+  var h='';
+  s.opts.forEach(function(o,k){ h+='<button class="choice" data-v="'+o+'"><span class="k">'+(k+1)+'</span>'+o+'</button>' });
+  stage.innerHTML=
+    '<div class="sprintbar"><div class="timer" id="tb"><i id="tf"></i></div><div class="secs" id="secs">'+Math.ceil(s.left)+'s</div><div class="combo">×'+s.combo+'</div></div>'+
+    '<div class="center"><div class="ask">Fix the broken word · '+(s.i+1)+' of '+s.items.length+'</div><div class="sentence pop">'+mark(it.s,'<s>$1</s><span class="blank">?</span>')+'</div></div>'+
+    '<div class="choices three">'+h+'</div>';
+  $$(".choice",stage).forEach(function(b){ b.addEventListener("click",function(){ answerL3(b) }) });
+  paintClock();
+}
+
+function paintClock(){
+  var s=S[3], f=$("#tf"), t=$("#secs"), b=$("#tb"); if(!f) return;
+  f.style.width=Math.max(0,s.left/L3_TIME*100)+"%"; t.textContent=Math.ceil(Math.max(0,s.left))+"s";
+  if(s.left<=10) b.classList.add("low");
+}
+
+function runClock(){
+  var s=S[3]; stopClock(); s.last=performance.now();
+  s.tick=setInterval(function(){
+    var now=performance.now(); s.left-= (now-s.last)/1000; s.last=now;
+    if(s.left<=0){ s.left=0; paintClock(); endSprint(); return; }
+    paintClock();
+  },100);
+}
+function stopClock(){ var s=S[3]; if(s&&s.tick){ clearInterval(s.tick); s.tick=null; } }
+
+function answerL3(btn){
+  if(busy) return; var s=S[3], it=s.items[s.i], v=btn.getAttribute("data-v");
+  busy=true; lockChoices(true);
+  if(v===it.a){
+    btn.classList.add("right"); beep("good");
+    var pts=100*s.combo; s.score+=pts; s.right++; s.streak++; s.combo=Math.min(5,s.combo+1);
+    hud(s.score,s.streak); floatPts("+"+pts);
+    s.i++; s.opts=null;
+    setTimeout(function(){ if(level!==3||s.phase!=="play"||s.paused||$(".fb",stage)||$(".help",stage)) return; drawSprint(); },380);
+  } else {
+    stopClock(); btn.classList.add("wrong"); beep("bad");
+    s.combo=1; s.streak=0; hud(s.score,s.streak);
+    feedback(false,pick(BAD)+" ⏸ Clock frozen",'<b>'+v+'</b> doesn\'t fit. '+it.h,"Try again",function(){ drawSprint(); runClock(); });
+  }
+}
+
+function endSprint(){
+  var s=S[3]; stopClock(); clearFeedback(); s.phase="done";
+  var best=parseInt(store("sensecheck_best")||"0",10)||0;
+  if(s.score>best){ store("sensecheck_best",String(s.score)); s.newBest=true; } else s.newBest=false;
+  renderEnd(3);
+}
+
+/* ===================== END SCREENS ===================== */
+function rank(p){ return p>=90?"GRAMMAR EXPERT":p>=70?"GREAT JOB":p>=50?"GOOD PROGRESS":"KEEP PRACTICING" }
+
+function renderEnd(lv){
+  var s=S[lv], h; if(!s.cheered){ s.cheered=true; beep("win"); }
+  if(lv<3){
+    var n=s.items.length, p=Math.round(s.first/n*100);
+    h='<div class="big">'+rank(p)+'</div>'+
+      '<div class="stats"><div class="stat"><b>'+s.score+'</b><small>Score</small></div><div class="stat"><b>'+s.first+'/'+n+'</b><small>First try</small></div></div>'+
+      '<p class="copy">'+(lv===1?'You ran the Sense Check well. Next up: words that switch jobs.':'You spotted the job-switchers. Now do it against the clock.')+'</p>';
+  } else {
+    h='<div class="big">'+(s.left<=0?"TIME!":"COMPLETE!")+'</div>'+
+      '<div class="stats"><div class="stat"><b>'+s.score+'</b><small>Score'+(s.newBest?' · NEW BEST':'')+'</small></div><div class="stat"><b>'+s.right+'</b><small>Fixed</small></div></div>'+
+      '<p class="copy">Endings like <b>-ness, -dom, -ity, -ship, -hood, -ment, -tion</b> turn words into abstract nouns.</p>';
+  }
+  stage.innerHTML='<div class="center"><div class="card">'+h+'<div class="row"><button class="btn alt" id="again">PLAY AGAIN</button>'+(lv<3?'<button class="btn" id="next">LEVEL '+(lv+1)+' →</button>':'')+'</div></div></div>';
+  $("#again").addEventListener("click",function(){ S[lv]=(lv===1?newL1():lv===2?newL2():newL3()); if(lv===3){ startSprint(); } else go(lv); });
+  var nx=$("#next"); if(nx) nx.addEventListener("click",function(){ go(lv+1) });
+}
+
+/* ===================== HELP ===================== */
+var HELP = {
+  1:'<b>THE SENSE CHECK.</b> If you can see it, hear it, smell it, taste it, or touch it, it\'s a <b>concrete</b> noun. Ideas, feelings and traits — love, anger, intelligence — are <b>abstract</b> nouns. ONE sense is enough to make it concrete.',
+  2:'<b>SAME WORD, DIFFERENT JOB.</b> A word is only a noun when it names a THING. <b>intelligent</b> describes the student; <b>intelligence</b> is a trait the student has. Check the job first, then run the Sense Check.',
+  3:'<b>FIX THE BROKEN WORD.</b> Pick the abstract noun that fits. Endings like <b>-ness, -dom, -ity, -ship, -hood, -ment, -tion</b> build abstract nouns. Watch out for words that name a person or object.'
+};
+function showHelp(){
+  if(busy||$(".help",stage)||$(".fb",stage)) return;
+  var wasRunning = level===3 && S[3] && S[3].tick; if(wasRunning) stopClock();
+  var d=document.createElement("div"); d.className="help";
+  d.innerHTML='<div class="fb-in"><div class="fb-t">THE RULE</div><div class="fb-b">'+HELP[level]+'</div><button class="fb-btn">Got it</button></div>';
+  stage.appendChild(d);
+  $(".fb-btn",d).addEventListener("click",function(){ d.parentNode.removeChild(d); if(wasRunning && level===3 && S[3].phase==="play") runClock(); });
+}
+$("#help").addEventListener("click",showHelp);
+
+/* ===================== FIT TO HEYZINE BOX ===================== */
+function fit(){
+  var a=$("#app"), W=window.innerWidth, H=window.innerHeight, k=Math.min(W/800,H/500);
+  a.style.transform="scale("+k+")";
+  a.style.left=((W-800*k)/2)+"px"; a.style.top=((H-500*k)/2)+"px";
+}
+window.addEventListener("resize",fit); fit();
+
+/* ===================== NAV ===================== */
+function go(lv){
+  clearFeedback();
+  if(level===3 && lv!==3 && S[3] && S[3].phase==="play"){ stopClock(); S[3].paused=true; }
+  level=lv;
+  $$(".tab").forEach(function(t){ var on=+t.getAttribute("data-l")===lv; t.classList.toggle("active",on); t.setAttribute("aria-selected",on) });
+  if(!S[lv]) S[lv]=(lv===1?newL1():lv===2?newL2():newL3());
+  if(lv===1) renderL1(); else if(lv===2) renderL2(); else {
+    if(S[3].phase==="play" && !S[3].paused && !S[3].tick){ S[3].paused=true; }
+    renderL3();
+  }
+}
+
+$$(".tab").forEach(function(t){ t.addEventListener("click",function(){ beep("tap"); go(+t.getAttribute("data-l")) }) });
+$("#mute").addEventListener("click",function(){ soundOn=!soundOn; this.textContent=soundOn?"🔊":"🔇"; });
+
+$("#playnow").addEventListener("click",function(){
+  beep("win");
+  var t=$("#title"); t.classList.add("hide");
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },300);
+});
+
+document.addEventListener("keydown",function(e){
+  if($("#title")){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); $("#playnow").click(); } return; }
+  var fb=$(".fb-btn",stage);
+  if(e.key==="?"){ showHelp(); return; }
+  if(fb && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); fb.click(); return; }
+  if(fb) return;
+  var n=parseInt(e.key,10);
+  if(n>=1&&n<=4){ var c=$$(".choice",stage)[n-1]; if(c&&!c.disabled) c.click(); }
+});
+
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden && level===3 && S[3] && S[3].phase==="play" && S[3].tick && !$(".fb",stage) && !$(".help",stage)){
+    stopClock(); S[3].paused=true; renderL3();
+  }
+});
+
+go(1);
+})();
+</script>
+</body>
+</html>
