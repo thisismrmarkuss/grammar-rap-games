@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Mr. Markuss's Grammar Rap Interactive Workbook: Common and Proper Nouns</title>
+<style>
+:root{
+  --bg:#17110b;--panel:#221a12;--panel2:#2e2318;--ink:#fbf3e4;--muted:#c9b89c;
+  --gold:#f2b33d;--orange:#e07a2e;--olive:#b9c23c;--green:#6fd35a;--red:#e5533d;--line:#3d2f20;
+  --display:"Arial Black","Arial Bold",Impact,"Helvetica Neue",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:none}
+body{font-family:var(--display);font-weight:900}
+button{font-family:inherit;font-weight:inherit;color:inherit;touch-action:manipulation}
+/* fixed 600x720 portrait design canvas, scaled to fit the Heyzine box */
+#app{position:absolute;left:0;top:0;width:600px;height:720px;transform-origin:0 0;display:flex;flex-direction:column;gap:8px;padding:10px 12px 12px;
+  background:radial-gradient(circle at 1px 1px,rgba(255,240,210,.06) 1px,transparent 0) 0 0/14px 14px,var(--bg)}
+header{height:50px;display:flex;align-items:center;gap:8px}
+.logo{flex:1;font-size:24px;color:var(--gold);transform:skew(-7deg);text-shadow:2px 2px 0 var(--orange),4px 4px 0 #000;line-height:1;white-space:nowrap}
+.logo small{display:block;font-family:var(--body);font-weight:800;font-size:12px;letter-spacing:2px;color:var(--olive);text-shadow:none;margin-top:4px}
+.chip{background:var(--panel);border:3px solid #000;border-radius:12px;height:46px;min-width:104px;display:flex;align-items:center;justify-content:center;padding:0 10px;font-size:18px}
+.chip b{color:var(--gold);margin-left:6px}
+.iconbtn{background:var(--panel);border:3px solid #000;border-radius:12px;width:46px;height:46px;cursor:pointer;font-size:21px}
+nav.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;height:46px}
+.tab{background:var(--panel);border:3px solid #000;border-radius:12px;cursor:pointer;font-size:16px;box-shadow:3px 3px 0 #000;white-space:nowrap}
+.tab span{color:var(--gold)}
+.tab.active{background:var(--gold);color:#1a120a;box-shadow:3px 3px 0 var(--orange)}
+.tab.active span{color:#1a120a}
+.tab:active{transform:translate(2px,2px)}
+#stage{position:relative;flex:1;min-height:0;border:3px solid #000;border-radius:18px;box-shadow:5px 5px 0 #000;overflow:hidden;background:#120d08}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+/* overlays */
+.ov{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(10,6,2,.9);animation:fade .15s}
+.card{width:100%;background:#120d08;border:4px solid var(--gold);border-radius:18px;box-shadow:5px 5px 0 #000;padding:18px 20px;text-align:center}
+.card.bad{border-color:var(--red);text-align:left}
+.card.good{border-color:var(--green)}
+.ct{font-size:40px;color:var(--gold);text-shadow:3px 3px 0 var(--orange),5px 5px 0 #000;transform:skew(-6deg);margin-bottom:8px;line-height:1.05}
+.card.bad .ct{font-size:34px;color:var(--red);text-shadow:2px 2px 0 #000}
+.cb{font-family:var(--body);font-weight:700;font-size:23px;line-height:1.4;color:#f6ecd9;margin-bottom:14px}
+.cb b{color:var(--gold)}
+.ctl{display:inline-block;font-family:var(--body);font-weight:800;font-size:18px;color:var(--muted);background:var(--panel2);border:2px solid #000;border-radius:10px;padding:6px 12px;margin-bottom:14px}
+.stats{display:flex;gap:10px;justify-content:center;margin:6px 0 12px}
+.stat{background:var(--panel2);border:3px solid #000;border-radius:12px;padding:6px 16px;box-shadow:3px 3px 0 #000;min-width:130px}
+.stat b{display:block;font-size:34px;color:var(--olive)}
+.stat small{font-family:var(--body);font-weight:800;font-size:14px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{background:var(--gold);color:#1a120a;border:3px solid #000;border-radius:14px;box-shadow:4px 4px 0 #000;padding:12px 24px;cursor:pointer;font-size:24px}
+.btn.alt{background:var(--panel2);color:var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
+/* title */
+#title{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;
+  background:radial-gradient(ellipse at 50% 38%,rgba(224,122,46,.25),transparent 62%),radial-gradient(circle at 1px 1px,rgba(255,240,210,.07) 1px,transparent 0) 0 0/14px 14px,var(--bg)}
+#title.hide{animation:titleout .3s ease-in forwards}
+.t-kicker{font-family:var(--body);font-weight:800;font-size:22px;letter-spacing:5px;color:var(--olive);text-transform:uppercase}
+.t-name{font-size:104px;line-height:.92;color:var(--gold);transform:skew(-7deg) rotate(-2deg);text-shadow:5px 5px 0 var(--orange),10px 10px 0 #000;margin:12px 0 10px;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.t-mid{font-size:24px;letter-spacing:6px;color:var(--olive);margin-bottom:22px}
+.t-sub{font-size:34px;color:var(--ink);text-shadow:3px 3px 0 #000;line-height:1.1}
+.t-levels{display:flex;flex-direction:column;gap:8px;margin:24px 0 28px}
+.t-levels div{background:var(--panel2);border:3px solid #000;border-radius:12px;box-shadow:3px 3px 0 #000;padding:8px 18px;font-size:19px}
+.t-levels span{color:var(--gold)}
+#playnow{font-size:40px;padding:16px 50px;border-radius:18px;box-shadow:6px 6px 0 #000;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes titleout{to{opacity:0;transform:scale(1.04)}}
+@keyframes pop{0%{transform:scale(.6) rotate(-6deg);opacity:0}100%{transform:skew(-7deg) rotate(-2deg);opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">GRAMMAR RAP<small>COMMON &amp; PROPER NOUNS</small></div>
+    <div class="chip">PTS<b id="score">0</b></div>
+    <button class="iconbtn" id="help" aria-label="Show the rule" title="Rule">?</button>
+    <button class="iconbtn" id="mute" aria-label="Toggle sound" title="Sound">🔊</button>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button class="tab" data-l="1" role="tab"><span>1</span> SLICE IT</button>
+    <button class="tab" data-l="2" role="tab"><span>2</span> LANE RACE</button>
+    <button class="tab" data-l="3" role="tab"><span>3</span> CAPITALS</button>
+  </nav>
+  <main id="stage"><canvas id="cv"></canvas></main>
+  <div id="title" role="dialog" aria-label="Title screen">
+    <div class="t-kicker">Mr. Markuss's</div>
+    <div class="t-name">GRAMMAR<br>RAP</div>
+    <div class="t-mid">INTERACTIVE WORKBOOK</div>
+    <div class="t-sub">COMMON &amp;<br>PROPER NOUNS</div>
+    <div class="t-levels"><div><span>1</span> SLICE IT</div><div><span>2</span> LANE RACE</div><div><span>3</span> CAPITAL BLASTER</div></div>
+    <button class="btn" id="playnow">PLAY NOW</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== CONTENT ===================== */
+// Proper nouns: w = how it is written, k = what kind of thing it names
+var PROPER = [
+  {w:"Mercedes",k:"car brand"},{w:"Jackson Middle School",k:"school"},{w:"Denver",k:"city"},
+  {w:"Colorado",k:"state"},{w:"Monday",k:"day of the week"},{w:"Friday",k:"day of the week"},{w:"July",k:"month"},
+  {w:"Mars",k:"planet"},{w:"Saturn",k:"planet"},{w:"Spanish",k:"language"},{w:"Thanksgiving",k:"holiday"},
+  {w:"Pacific Ocean",k:"ocean"},{w:"Lake Michigan",k:"lake"},{w:"Mississippi River",k:"river"},
+  {w:"Pikes Peak",k:"mountain"},{w:"Africa",k:"continent"},{w:"Mexico",k:"country"},{w:"Japan",k:"country"},
+  {w:"Chicago",k:"city"},{w:"Colfax Avenue",k:"street"},{w:"Grand Canyon",k:"canyon"},{w:"Texas",k:"state"},
+  {w:"Union Station",k:"train station"},{w:"Nike",k:"shoe brand"}
+];
+// Common nouns: ex = a proper noun of the same kind, n = optional special note
+var COMMON = [
+  {w:"woman",ex:"Ms. Black"},{w:"car",n:"A car brand like <b>Mercedes</b> is proper, but the word car is not."},
+  {w:"school",ex:"Jackson Middle School"},{w:"city",ex:"Denver"},{w:"state",ex:"Colorado"},{w:"month",ex:"July"},
+  {w:"planet",ex:"Mars"},{w:"language",ex:"Spanish"},{w:"holiday",ex:"Thanksgiving"},
+  {w:"ocean",ex:"the Pacific Ocean"},{w:"river",ex:"the Mississippi River"},{w:"mountain",ex:"Pikes Peak"},
+  {w:"country",ex:"Mexico"},{w:"teacher",ex:"Ms. Black"},
+  {w:"summer",n:"Seasons are common nouns. Months like July are proper, but summer, fall, winter and spring are not."},
+  {w:"winter",n:"Seasons are common nouns. Months like July are proper, but summer, fall, winter and spring are not."},
+  {w:"dog",ex:"Max"},
+  {w:"middle school",ex:"Jackson Middle School"},{w:"high school",ex:"East High School"},
+  {w:"fire truck",n:"It could be any fire truck. Two words does not make a name."},
+  {w:"city park",ex:"City Park in Denver"},{w:"grocery store",ex:"a store's real name"},
+  {w:"train station",ex:"Union Station"},{w:"movie theater",ex:"a theater's real name"},
+  {w:"shoe store",ex:"a store's real name"},{w:"basketball team",ex:"the Denver Nuggets"},
+  {w:"science teacher",ex:"Ms. Black"},{w:"canyon",ex:"the Grand Canyon"}
+];
+// Level 2: tricky pairs. p = proper?  n = explanation
+var L2 = [
+  {w:"summer",p:0,n:"Seasons are common nouns. <b>summer</b> is not a name."},
+  {w:"July",p:1,n:"Months are names, so <b>July</b> is a proper noun."},
+  {w:"winter",p:0,n:"Seasons are common nouns, even though months and holidays are proper."},
+  {w:"Monday",p:1,n:"Days of the week are names. <b>Monday</b> is proper."},
+  {w:"Thanksgiving",p:1,n:"<b>Thanksgiving</b> names one specific holiday. Proper."},
+  {w:"holiday",p:0,n:"<b>holiday</b> could be ANY holiday. Common."},
+  {w:"doctor",p:0,n:"<b>doctor</b> could be any doctor. Common."},
+  {w:"Dr. Lee",p:1,n:"<b>Dr. Lee</b> names one specific person. Proper."},
+  {w:"my grandma",p:0,n:"With <b>my</b> in front, grandma is just a family word. Common."},
+  {w:"Grandma Rose",p:1,n:"<b>Grandma Rose</b> is her name. Proper."},
+  {w:"president",p:0,n:"<b>president</b> could mean any president. Common."},
+  {w:"President Lincoln",p:1,n:"<b>President Lincoln</b> names one specific person. Proper."},
+  {w:"Spanish",p:1,n:"Languages are proper nouns. <b>Spanish</b> is always capitalized."},
+  {w:"language",p:0,n:"<b>language</b> could be any language. Common."},
+  {w:"Lake Michigan",p:1,n:"<b>Lake Michigan</b> names one specific lake. Proper."},
+  {w:"lake",p:0,n:"<b>lake</b> could be any lake. Common."},
+  {w:"Mercedes",p:1,n:"Brand names are proper. <b>Mercedes</b> is one specific company."},
+  {w:"car",p:0,n:"<b>car</b> could be any car. Common."},
+  {w:"Jackson Middle School",p:1,n:"Straight from page 8: <b>Jackson Middle School</b> is one specific school."},
+  {w:"middle school",p:0,n:"<b>middle school</b> could be any middle school. Common."},
+  {w:"Saturn",p:1,n:"Planet names are proper. <b>Saturn</b> is one specific planet."},
+  {w:"planet",p:0,n:"<b>planet</b> could be any planet. Common."},
+  {w:"Colfax Avenue",p:1,n:"Street names are proper. <b>Colfax Avenue</b> is one specific street."},
+  {w:"avenue",p:0,n:"<b>avenue</b> could be any avenue. Common."}
+];
+var GOOD=["Correct!","Nice!","Well done!","Exactly!","You got it!"];
+var BAD=["Not quite.","Almost.","Take another look."];
+
+/* ===================== HELPERS ===================== */
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function art(w){return /^[aeiou]/i.test(w)?"an":"a"}
+
+var stage=$("#stage"), cv=$("#cv"), ctx=cv.getContext("2d");
+var CW=570, CH=0, DPR=2;  // canvas size in design px (height measured at start)
+var soundOn=true, actx=null, level=1, total=0;
+
+function sizeCanvas(){
+  CW=stage.clientWidth; CH=stage.clientHeight;
+  cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+
+function beep(kind){
+  if(!soundOn) return;
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==="suspended") actx.resume();
+    var o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.connect(g);g.connect(actx.destination);
+    var len=.25;
+    if(kind==="good"){o.type="square";o.frequency.setValueAtTime(660,t);o.frequency.setValueAtTime(990,t+.07)}
+    else if(kind==="bad"){o.type="sawtooth";o.frequency.setValueAtTime(200,t);o.frequency.linearRampToValueAtTime(80,t+.3);len=.32}
+    else if(kind==="slice"){o.type="triangle";o.frequency.setValueAtTime(1200,t);o.frequency.exponentialRampToValueAtTime(300,t+.12);len=.14}
+    else if(kind==="laser"){o.type="square";o.frequency.setValueAtTime(1500,t);o.frequency.exponentialRampToValueAtTime(200,t+.15);len=.16}
+    else if(kind==="win"){o.type="square";[523,659,784,1046].forEach(function(f,i){o.frequency.setValueAtTime(f,t+i*.1)});len=.5}
+    else {o.type="triangle";o.frequency.setValueAtTime(520,t);len=.12}
+    g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+len);o.start(t);o.stop(t+len+.02);
+  }catch(e){}
+}
+function addScore(n){ total=Math.max(0,total+n); $("#score").textContent=total; }
+
+/* ---------- canvas drawing helpers ---------- */
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function font(px){return "900 "+px+"px \"Arial Black\",\"Arial Bold\",Impact,sans-serif"}
+function pill(text,x,y,px,fill,ink,stroke){
+  ctx.font=font(px); var w=ctx.measureText(text).width+px*1.1, h=px*1.7;
+  rr(x-w/2+4,y-h/2+4,w,h,h/2); ctx.fillStyle="#000"; ctx.fill();
+  rr(x-w/2,y-h/2,w,h,h/2); ctx.fillStyle=fill; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle=stroke||"#000"; ctx.stroke();
+  ctx.fillStyle=ink; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(text,x,y+1);
+  return {w:w,h:h};
+}
+function hearts(n,max){
+  ctx.fillStyle="rgba(12,9,6,.92)"; ctx.fillRect(0,0,CW,42); ctx.fillStyle="#3d2f20"; ctx.fillRect(0,42,CW,2);
+  ctx.font=font(22); ctx.textAlign="left"; ctx.textBaseline="top";
+  for(var i=0;i<max;i++){ ctx.fillStyle=i<n?"#e5533d":"#3d2f20"; ctx.fillText("♥",14+i*26,10); }
+}
+function hudText(t,x,align){ ctx.font=font(20); ctx.textAlign=align||"right"; ctx.textBaseline="top"; ctx.fillStyle="#000"; ctx.fillText(t,x+2,12); ctx.fillStyle="#f2b33d"; ctx.fillText(t,x,10); }
+var parts=[];
+function burst(x,y,col,n){ for(var i=0;i<(n||14);i++){ var a=Math.random()*6.283,s=rnd(80,260); parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.6,col:col}); } }
+function stepParts(dt){ for(var i=parts.length-1;i>=0;i--){var p=parts[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=400*dt;if(p.life<=0)parts.splice(i,1)} }
+function drawParts(){ parts.forEach(function(p){ ctx.globalAlpha=Math.max(0,p.life/.6); ctx.fillStyle=p.col; ctx.fillRect(p.x-3,p.y-3,6,6); }); ctx.globalAlpha=1; }
+var floats=[];
+function floatText(t,x,y,col){ floats.push({t:t,x:x,y:y,life:1,col:col}); }
+function stepFloats(dt){ for(var i=floats.length-1;i>=0;i--){var f=floats[i];f.life-=dt;f.y-=40*dt;if(f.life<=0)floats.splice(i,1)} }
+function drawFloats(){ floats.forEach(function(f){ ctx.globalAlpha=Math.max(0,f.life); ctx.font=font(24); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle="#000"; ctx.fillText(f.t,f.x+2,f.y+2); ctx.fillStyle=f.col; ctx.fillText(f.t,f.x,f.y); }); ctx.globalAlpha=1; }
+
+/* ===================== OVERLAYS ===================== */
+var paused=false, pendingCb=null;
+function overlay(html,cls){
+  closeOverlay(); var d=document.createElement("div"); d.className="ov";
+  d.innerHTML='<div class="card '+(cls||"")+'">'+html+'</div>'; stage.appendChild(d); return d;
+}
+function closeOverlay(){ var o=$(".ov",stage); if(o) o.parentNode.removeChild(o); }
+function feedback(title,body,cb){
+  paused=true; beep("bad");
+  var d=overlay('<div class="ct">'+title+'</div><div class="cb">'+body+'</div><div class="row"><button class="btn" id="fbgo">Keep going</button></div>',"bad");
+  var go=function(){ pendingCb=null; closeOverlay(); paused=false; last=performance.now(); if(cb) cb(); };
+  pendingCb=go;
+  $("#fbgo",d).addEventListener("click",go);
+  setTimeout(function(){ var b=$("#fbgo",d); if(b) b.focus({preventScroll:true}); },50);
+}
+
+var HELP={
+  1:'A <b>common noun</b> names ANY person, place, or thing: <b>woman, car, school</b>. A <b>proper noun</b> names ONE specific one: <b>Ms. Black, Mercedes, Jackson Middle School</b>.',
+  2:'Watch for tricky ones. <b>Days, months, holidays, languages and brand names</b> are proper. <b>Seasons</b> are common. <b>my grandma</b> is common, but <b>Grandma Rose</b> is proper.',
+  3:'Proper nouns are <b>always capitalized</b>, even in the middle of a sentence. Blast the words that need a capital letter. Let common nouns go by.'
+};
+function showHelp(){
+  if(paused) return; var g=G[level];
+  if(g.state!=="play"){ return infoCard(); }
+  paused=true;
+  var d=overlay('<div class="ct">THE RULE</div><div class="cb">'+HELP[level]+'</div><div class="row"><button class="btn" id="hgo">Got it</button></div>');
+  $("#hgo",d).addEventListener("click",function(){ closeOverlay(); paused=false; last=performance.now(); });
+}
+
+/* ===================== LEVEL FRAMEWORK ===================== */
+var INFO={
+  1:{name:"SLICE IT",how:'Words fly up. <b>Slice only the proper nouns.</b> Leave the common nouns alone. Slice 12 to win. Let 3 get away and you lose a heart.',ctl:'Swipe across a word (or tap it)'},
+  2:{name:"LANE RACE",how:'A word sign rolls toward you. Steer into the <b>COMMON</b> or <b>PROPER</b> lane before it reaches your car. Clear 16 signs to win.',ctl:'Tap a lane, or use ← → keys'},
+  3:{name:"CAPITAL BLASTER",how:'Words fall in lowercase. <b>Blast the ones that need a capital letter.</b> Let common nouns pass. Do not let a proper noun reach the bottom!',ctl:'Tap a word to blast it'}
+};
+var G={1:{state:"intro"},2:{state:"intro"},3:{state:"intro"}};
+
+function infoCard(){
+  var g=G[level], i=INFO[level];
+  if(g.state==="play"){ g.state="paused"; }
+  var paused_=g.state==="paused";
+  paused=true;
+  var d=overlay('<div class="ct">LEVEL '+level+'<br>'+i.name+'</div><div class="cb">'+i.how+'</div><div class="ctl">'+i.ctl+'</div>'+
+    '<div class="row">'+(paused_?'<button class="btn" id="resume">RESUME</button><button class="btn alt" id="start">RESTART</button>':'<button class="btn" id="start">START</button>')+'</div>');
+  $("#start",d).addEventListener("click",function(){ closeOverlay(); paused=false; startLevel(level); });
+  var r=$("#resume",d); if(r) r.addEventListener("click",function(){ closeOverlay(); paused=false; g.state="play"; last=performance.now(); });
+}
+
+function startLevel(lv){
+  parts=[]; floats=[]; beep("tap");
+  if(lv===1) G[1]=newL1(); else if(lv===2) G[2]=newL2(); else G[3]=newL3();
+  G[lv].state="play"; last=performance.now();
+}
+
+function endLevel(win,lines){
+  var g=G[level]; g.state="over"; paused=true; beep(win?"win":"bad");
+  var best=parseInt(store("pcn_best"+level)||"0",10)||0, nb=false;
+  if(g.score>best){ store("pcn_best"+level,String(g.score)); best=g.score; nb=true; }
+  var d=overlay('<div class="ct">'+(win?"LEVEL CLEAR!":"GAME OVER")+'</div>'+
+    '<div class="stats"><div class="stat"><b>'+g.score+'</b><small>'+(nb?"New best":"Score")+'</small></div><div class="stat"><b>'+best+'</b><small>Best</small></div></div>'+
+    '<div class="cb">'+lines+'</div>'+
+    '<div class="row"><button class="btn alt" id="again">PLAY AGAIN</button>'+(level<3?'<button class="btn" id="next">LEVEL '+(level+1)+' →</button>':'')+'</div>', win?"good":"");
+  $("#again",d).addEventListener("click",function(){ closeOverlay(); paused=false; startLevel(level); });
+  var n=$("#next",d); if(n) n.addEventListener("click",function(){ go(level+1); });
+}
+
+/* ===================== LEVEL 1: SLICE IT ===================== */
+function newL1(){ return {lives:3,score:0,got:0,goal:12,items:[],spawnT:.6,trail:[],missed:0,
+  pq:shuffle(PROPER), cq:shuffle(COMMON)} }
+function l1Spawn(g){
+  var proper = Math.random()<.55;
+  var src = proper ? (g.pq.length?g.pq:(g.pq=shuffle(PROPER))) : (g.cq.length?g.cq:(g.cq=shuffle(COMMON)));
+  var it=src.pop();
+  var x=rnd(CW*.2,CW*.8);
+  g.items.push({t:it.w.toUpperCase(),it:it,proper:proper,x:x,y:CH+30,vx:(CW/2-x)*rnd(.25,.6),vy:-rnd(Math.sqrt(2*560*CH*.5),Math.sqrt(2*560*CH*.82)),rot:rnd(-.3,.3),vr:rnd(-1.2,1.2),dead:false,halves:null});
+}
+function l1Update(g,dt){
+  if(g.got>=g.goal){ g.winT=(g.winT||.5)-dt; if(g.winT<=0) return endLevel(true,'You sliced '+g.goal+' proper nouns. Proper nouns name ONE specific person, place or thing.'); }
+  g.spawnT-=dt;
+  var speedUp=Math.min(1,g.got/g.goal);
+  if(g.spawnT<=0){ l1Spawn(g); if(Math.random()<.25+speedUp*.35) l1Spawn(g); g.spawnT=rnd(1.0,1.5)-speedUp*.45; }
+  for(var i=g.items.length-1;i>=0;i--){
+    var o=g.items[i];
+    if(o.halves){ o.halves.forEach(function(h){h.x+=h.vx*dt;h.y+=h.vy*dt;h.vy+=560*dt;h.r+=h.vr*dt}); o.ht-=dt; if(o.ht<=0) g.items.splice(i,1); continue; }
+    o.x+=o.vx*dt; o.y+=o.vy*dt; o.vy+=560*dt; o.rot+=o.vr*dt;
+    if(o.y>CH+60 && o.vy>0){
+      g.items.splice(i,1);
+      if(o.proper && g.got<g.goal){ g.missed++; floatText("missed "+o.it.w, Math.max(90,Math.min(CW-90,o.x)), CH-40, "#c9b89c");
+        if(g.missed%3===0){ g.lives--; burst(CW/2,CH-20,"#e5533d",14);
+          feedback("Three got away","You let 3 proper nouns fly past, so you lose a heart. The last one was <b>"+o.it.w+"</b>, the name of one specific "+o.it.k+". Slice every name you see!",function(){ if(g.lives<=0) endLevel(false,'Slice every proper noun: names of ONE specific person, place or thing.'); });
+          return; } }
+    }
+  }
+  for(var k=g.trail.length-1;k>=0;k--){ g.trail[k].life-=dt; if(g.trail[k].life<=0) g.trail.splice(k,1); }
+}
+function l1Box(o){ ctx.font=font(26); var w=ctx.measureText(o.t).width+30; return {x:o.x-w/2-6,y:o.y-26,w:w+12,h:52}; }
+function segHit(ax,ay,bx,by,b){ // segment vs box (sampled)
+  var n=Math.max(1,Math.ceil(Math.hypot(bx-ax,by-ay)/6));
+  for(var i=0;i<=n;i++){ var x=ax+(bx-ax)*i/n, y=ay+(by-ay)*i/n; if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h) return true; }
+  return false;
+}
+function l1Slice(g,ax,ay,bx,by){
+  var combo=0; if(g.got>=g.goal) return;
+  for(var i=0;i<g.items.length;i++){
+    var o=g.items[i]; if(o.halves||o.dead) continue;
+    if(!segHit(ax,ay,bx,by,l1Box(o))) continue;
+    if(g.got>=g.goal) return;
+    if(o.proper){
+      combo++; g.got++; var pts=10*combo; g.score+=pts; addScore(pts); beep("slice");
+      burst(o.x,o.y,"#f2b33d",16); floatText("+"+pts,o.x,o.y-30,"#6fd35a");
+      o.halves=[{x:o.x-10,y:o.y,vx:-120+o.vx*.3,vy:o.vy*.4-60,r:o.rot,vr:-3,s:-1},{x:o.x+10,y:o.y,vx:120+o.vx*.3,vy:o.vy*.4-60,r:o.rot,vr:3,s:1}]; o.ht=.9;
+
+    } else {
+      o.dead=true; g.lives--; burst(o.x,o.y,"#e5533d",10);
+      var c=o.it, body='<b>'+c.w+'</b> is a common noun. '+(c.n?c.n:'It could be ANY '+c.w+'. A proper noun names one specific one, like <b>'+c.ex+'</b>.');
+      g.trail=[];
+      (function(obj){ feedback(pick(BAD),body,function(){ var ix=g.items.indexOf(obj); if(ix>=0) g.items.splice(ix,1); if(g.lives<=0) endLevel(false,'Remember: slice only names of ONE specific person, place or thing.'); }); })(o);
+      return;
+    }
+  }
+}
+function l1Draw(g){
+  // background
+  var gr=ctx.createLinearGradient(0,0,0,CH); gr.addColorStop(0,"#241a10"); gr.addColorStop(1,"#120d08"); ctx.fillStyle=gr; ctx.fillRect(0,0,CW,CH);
+  ctx.font=font(80); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle="rgba(242,179,61,.05)"; ctx.fillText("PROPER",CW/2,CH/2-40); ctx.fillText("ONLY",CW/2,CH/2+50);
+  g.items.forEach(function(o){
+    if(o.halves){
+      o.halves.forEach(function(h){ ctx.save(); ctx.translate(h.x,h.y); ctx.rotate(h.r); ctx.beginPath(); ctx.rect(h.s<0?-400:0,-60,400,120); ctx.clip(); pill(o.t,0,0,26,"#6fd35a","#0d3305"); ctx.restore(); });
+      return;
+    }
+    ctx.save(); ctx.translate(o.x,o.y); ctx.rotate(o.rot);
+    pill(o.t,0,0,26,o.dead?"#e5533d":"#2e2318",o.dead?"#fff":"#fbf3e4", o.dead?"#000":"#000");
+    ctx.restore();
+  });
+  // blade trail
+  if(g.trail.length>1){ ctx.lineCap="round"; ctx.lineJoin="round";
+    for(var i=1;i<g.trail.length;i++){ var a=g.trail[i-1],b=g.trail[i]; ctx.strokeStyle="rgba(255,240,200,"+Math.min(1,b.life*4)+")"; ctx.lineWidth=2+b.life*28; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } }
+  hearts(g.lives,3); hudText(g.got+"/"+g.goal+" PROPER  MISSED "+(g.missed%3)+"/3",CW-14);
+}
+
+/* ===================== LEVEL 2: LANE RACE ===================== */
+function newL2(){ return {lives:3,score:0,cleared:0,goal:16,lane:0,carX:0,speed:150,dash:0,sign:null,q:shuffle(L2),shake:0,gap:0} }
+function laneX(l){ return l===0?CW*.27:CW*.73; }
+function l2NextSign(g){ if(!g.q.length) g.q=shuffle(L2); var it=g.q.pop(); g.sign={it:it,y:-70,done:false}; }
+function l2Update(g,dt){
+  if(!g.carX) g.carX=laneX(g.lane);
+  g.carX+=(laneX(g.lane)-g.carX)*Math.min(1,dt*14);
+  g.dash=(g.dash+g.speed*dt)%60; if(g.shake>0) g.shake-=dt;
+  if(g.cleared>=g.goal){ g.winT=(g.winT||.4)-dt; if(g.winT<=0) endLevel(true,'You cleared '+g.goal+' signs, tricky ones included.'); return; }
+  if(!g.sign){ g.gap-=dt; if(g.gap<=0) l2NextSign(g); return; }
+  var s=g.sign; s.y+=g.speed*dt;
+  var carY=CH-110;
+  if(!s.done && s.y>=carY-40){
+    s.done=true;
+    var right=(g.lane===1)===!!s.it.p;
+    if(right){ g.cleared++; var pts=10+Math.floor(g.speed/30); g.score+=pts; addScore(pts); beep("good"); burst(g.carX,carY,"#6fd35a",14); floatText("+"+pts,g.carX,carY-60,"#6fd35a");
+      g.speed=Math.min(330,g.speed+12);
+
+    } else {
+      g.lives--; g.shake=.4; burst(g.carX,carY,"#e5533d",18);
+      var it=s.it, body='That one goes in the <b>'+(it.p?'PROPER':'COMMON')+'</b> lane. '+it.n;
+      feedback("Wrong lane!",body,function(){ if(g.lives<=0) endLevel(false,'Tip: ask "Is this the NAME of one specific person, place or thing?"'); });
+    }
+  }
+  if(s.y>CH+80){ g.sign=null; g.gap=.35; }
+}
+function l2Draw(g){
+  var sx=g.shake>0?rnd(-6,6):0; ctx.save(); ctx.translate(sx,0);
+  ctx.fillStyle="#3b3a36"; ctx.fillRect(0,0,CW,CH);
+  ctx.fillStyle="#2b5a2a"; ctx.fillRect(0,0,22,CH); ctx.fillRect(CW-22,0,22,CH);
+  ctx.fillStyle="#e9e2cf"; ctx.fillRect(22,0,6,CH); ctx.fillRect(CW-28,0,6,CH);
+  ctx.fillStyle="#f2b33d"; for(var y=-60+g.dash;y<CH;y+=60) ctx.fillRect(CW/2-4,y,8,32);
+  // lane labels near bottom
+  ctx.font=font(26); ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillStyle="rgba(224,122,46,.85)"; ctx.fillText("COMMON",laneX(0),CH-28);
+  ctx.fillStyle="rgba(185,194,60,.9)"; ctx.fillText("PROPER",laneX(1),CH-28);
+  // sign
+  if(g.sign){ var s=g.sign;
+    ctx.fillStyle="#000"; ctx.fillRect(40,s.y+6,CW-80,8);
+    rr(30,s.y-38,CW-60,64,14); ctx.fillStyle="#000"; ctx.fill();
+    rr(26,s.y-42,CW-60,64,14); ctx.fillStyle=s.done?"#6b5a43":"#f2b33d"; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle="#000"; ctx.stroke();
+    ctx.fillStyle="#1a120a"; var fz=34; ctx.font=font(fz); while(ctx.measureText(s.it.w.toUpperCase()).width>CW-110 && fz>18){ fz-=2; ctx.font=font(fz); }
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(s.it.w.toUpperCase(),CW/2-4,s.y-10);
+  }
+  // car
+  var cx=g.carX||laneX(0), cy=CH-110;
+  rr(cx-30,cy-46,64,96,16); ctx.fillStyle="#000"; ctx.fill();
+  rr(cx-34,cy-50,64,96,16); ctx.fillStyle="#e07a2e"; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle="#000"; ctx.stroke();
+  rr(cx-24,cy-34,44,24,6); ctx.fillStyle="#bfe6ef"; ctx.fill(); ctx.stroke();
+  rr(cx-24,cy+12,44,18,6); ctx.fillStyle="#9ccbd6"; ctx.fill(); ctx.stroke();
+  ctx.fillStyle="#f2b33d"; ctx.fillRect(cx-30,cy-50,10,6); ctx.fillRect(cx+16,cy-50,10,6);
+  ctx.restore();
+  hearts(g.lives,3); hudText(g.cleared+" / "+g.goal+" SIGNS",CW-14);
+}
+function l2Steer(l){ var g=G[2]; if(g.state==="play"&&!paused){ if(g.lane!==l) beep("tap"); g.lane=l; } }
+
+/* ===================== LEVEL 3: CAPITAL BLASTER ===================== */
+function newL3(){
+  var p=shuffle(PROPER).slice(0,11), c=shuffle(COMMON).slice(0,9), q=[];
+  p.forEach(function(x){ q.push({w:x.w,low:x.w.toLowerCase(),p:1,k:x.k}); });
+  c.forEach(function(x){ q.push({w:x.w,low:x.w.toLowerCase(),p:0,ex:x.ex,n:x.n}); });
+  return {lives:3,score:0,q:shuffle(q),words:[],spawnT:.8,shipX:0,targetX:0,beam:null,combo:1,done:0,total:q.length,speed:46,stars:null};
+}
+function l3Update(g,dt){
+  if(!g.stars){ g.stars=[]; for(var i=0;i<60;i++) g.stars.push({x:Math.random()*CW,y:Math.random()*CH,s:rnd(10,40)}); g.shipX=g.targetX=CW/2; }
+  g.stars.forEach(function(s){ s.y+=s.s*dt; if(s.y>CH) s.y=0; });
+  g.shipX+=(g.targetX-g.shipX)*Math.min(1,dt*16);
+  if(g.beam){ g.beam.t-=dt; if(g.beam.t<=0) g.beam=null; }
+  g.spawnT-=dt;
+  if(g.spawnT<=0 && g.q.length){ var it=g.q.pop(); ctx.font=font(26); var w=ctx.measureText(it.low).width+30;
+    g.words.push({it:it,x:rnd(w/2+12,CW-w/2-12),y:66,hit:0,fade:0}); g.spawnT=Math.max(1.0,2.3-g.done*.06); }
+  var floor=CH-96;
+  for(var i=g.words.length-1;i>=0;i--){
+    var o=g.words[i];
+    if(o.hit){ o.y-=60*dt; o.fade-=dt; if(o.fade<=0){ g.words.splice(i,1); if(g.done>=g.total && !g.words.length){ l3Check(g); return; } } continue; }
+    o.y+=(g.speed+g.done*2.4)*dt;
+    if(o.y>=floor){
+      if(o.it.p){
+        g.lives--; g.combo=1; burst(o.x,o.y,"#e5533d",16); g.words.splice(i,1); g.done++;
+        var it=o.it;
+        feedback("It got past!",'<b>'+it.low+'</b> needed '+(it.w.indexOf(" ")>0?'capital letters':'a capital letter')+': <b>'+it.w+'</b>. It names one specific '+it.k+', so it is a proper noun.',function(){ l3Check(g); });
+        return;
+      } else {
+        g.done++; g.score+=5; addScore(5); floatText("+5 let it pass",o.x,floor-20,"#b9c23c"); g.words.splice(i,1); l3Check(g);
+      }
+    }
+  }
+}
+function l3Check(g){
+  if(G[3]!==g||g.state!=="play") return;
+  if(g.lives<=0) return endLevel(false,'Proper nouns are always capitalized, even in the middle of a sentence.');
+  if(g.done>=g.total && !g.words.length) endLevel(true,'Every name got its capital letter. Proper nouns are <b>always</b> capitalized.');
+}
+function l3Box(o){ ctx.font=font(26); var w=ctx.measureText(o.hit?o.it.w:o.it.low).width+30; return {x:o.x-w/2-8,y:o.y-30,w:w+16,h:60}; }
+function l3Tap(x,y){
+  var g=G[3]; if(g.state!=="play"||paused) return;
+  for(var i=g.words.length-1;i>=0;i--){
+    var o=g.words[i]; if(o.hit) continue; var b=l3Box(o);
+    if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){
+      g.targetX=o.x; g.beam={x:o.x,y:o.y,t:.18}; beep("laser");
+      if(o.it.p){ o.hit=1; o.fade=.9; g.done++; var pts=10*g.combo; g.combo=Math.min(5,g.combo+1); g.score+=pts; addScore(pts);
+        burst(o.x,o.y,"#6fd35a",18); floatText("+"+pts,o.x,o.y-36,"#6fd35a");
+      } else {
+        g.lives--; g.combo=1; burst(o.x,o.y,"#e5533d",12); g.words.splice(i,1); g.done++;
+        var it=o.it;
+        feedback(pick(BAD),'<b>'+it.low+'</b> is a common noun, so it stays lowercase. '+(it.n?it.n:'It could be ANY '+it.low+'. A proper noun names one, like <b>'+it.ex+'</b>.'),function(){ l3Check(g); });
+      }
+      return;
+    }
+  }
+  g.targetX=Math.max(30,Math.min(CW-30,x));
+}
+function l3Draw(g){
+  ctx.fillStyle="#0c0906"; ctx.fillRect(0,0,CW,CH);
+  if(g.stars) g.stars.forEach(function(s){ ctx.fillStyle="rgba(251,243,228,"+(s.s/50)+")"; ctx.fillRect(s.x,s.y,2,2); });
+  var floor=CH-96;
+  ctx.strokeStyle="rgba(229,83,61,.6)"; ctx.setLineDash([10,8]); ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,floor); ctx.lineTo(CW,floor); ctx.stroke(); ctx.setLineDash([]);
+  g.words.forEach(function(o){
+    if(o.hit){ ctx.globalAlpha=Math.max(0,o.fade/.9); pill(o.it.w,o.x,o.y,26,"#6fd35a","#0d3305"); ctx.globalAlpha=1; }
+    else pill(o.it.low,o.x,o.y,26,"#2e2318","#fbf3e4");
+  });
+  var sx=g.shipX||CW/2, sy=CH-48;
+  if(g.beam){ ctx.strokeStyle="#f2b33d"; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(g.beam.x,sy-30); ctx.lineTo(g.beam.x,g.beam.y); ctx.stroke(); ctx.strokeStyle="#fff"; ctx.lineWidth=2; ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(sx,sy-34); ctx.lineTo(sx+32,sy+22); ctx.lineTo(sx-32,sy+22); ctx.closePath(); ctx.fillStyle="#f2b33d"; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle="#000"; ctx.stroke();
+  ctx.fillStyle="#e07a2e"; ctx.fillRect(sx-8,sy+22,16,8);
+  hearts(g.lives,3); hudText("x"+g.combo+"   "+Math.min(g.done,g.total)+" / "+g.total,CW-14);
+}
+
+/* ===================== LOOP ===================== */
+var last=performance.now();
+function frame(now){
+  var dt=Math.min(.05,(now-last)/1000); last=now;
+  var g=G[level];
+  if(g.state==="play" && !paused){
+    if(level===1) l1Update(g,dt); else if(level===2) l2Update(g,dt); else l3Update(g,dt);
+    stepParts(dt); stepFloats(dt);
+  }
+  ctx.clearRect(0,0,CW,CH);
+  if(g.state==="intro"||!g.lives){ drawIdle(); }
+  else { if(level===1) l1Draw(g); else if(level===2) l2Draw(g); else l3Draw(g); drawParts(); drawFloats(); }
+  requestAnimationFrame(frame);
+}
+function drawIdle(){
+  var gr=ctx.createLinearGradient(0,0,0,CH); gr.addColorStop(0,"#241a10"); gr.addColorStop(1,"#120d08"); ctx.fillStyle=gr; ctx.fillRect(0,0,CW,CH);
+}
+
+/* ===================== INPUT ===================== */
+function toCanvas(e){ var r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*CW/r.width, y:(e.clientY-r.top)*CH/r.height}; }
+var down=false, lastP=null;
+cv.addEventListener("pointerdown",function(e){
+  e.preventDefault(); var p=toCanvas(e), g=G[level];
+  if(g.state!=="play"||paused) return;
+  if(level===1){ down=true; lastP=p; g.trail.push({x:p.x,y:p.y,life:.25}); l1Slice(g,p.x-1,p.y-1,p.x+1,p.y+1); try{cv.setPointerCapture(e.pointerId)}catch(_){} }
+  else if(level===2){ l2Steer(p.x<CW/2?0:1); }
+  else l3Tap(p.x,p.y);
+});
+cv.addEventListener("pointermove",function(e){
+  if(level!==1||!down) return; var g=G[1]; if(g.state!=="play"||paused){ down=false; return; }
+  var p=toCanvas(e); g.trail.push({x:p.x,y:p.y,life:.25}); if(g.trail.length>14) g.trail.shift();
+  l1Slice(g,lastP.x,lastP.y,p.x,p.y); lastP=p;
+});
+function up(){ down=false; lastP=null; }
+cv.addEventListener("pointerup",up); cv.addEventListener("pointercancel",up); cv.addEventListener("pointerleave",up);
+
+document.addEventListener("keydown",function(e){
+  if($("#title")){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); $("#playnow").click(); } return; }
+  var b=$(".ov .btn",stage);
+  if(b && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); b.click(); return; }
+  if(e.key==="?"){ showHelp(); return; }
+  if(e.key===" "||e.key==="Enter"){ e.preventDefault(); if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); return; }
+  if(level===2){ if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A") l2Steer(0); if(e.key==="ArrowRight"||e.key==="d"||e.key==="D") l2Steer(1); }
+});
+
+/* ===================== NAV ===================== */
+function go(lv){
+  if(pendingCb){ var f=pendingCb; pendingCb=null; f(); }
+  var g=G[level]; if(g.state==="play") g.state="paused";
+  closeOverlay(); paused=false; level=lv;
+  $$(".tab").forEach(function(t){ var on=+t.getAttribute("data-l")===lv; t.classList.toggle("active",on); t.setAttribute("aria-selected",on); });
+  infoCard();
+}
+$$(".tab").forEach(function(t){ t.addEventListener("click",function(){ beep("tap"); t.blur(); go(+t.getAttribute("data-l")); }); });
+$("#help").addEventListener("click",showHelp);
+$("#mute").addEventListener("click",function(){ soundOn=!soundOn; this.textContent=soundOn?"🔊":"🔇"; });
+$("#playnow").addEventListener("click",function(){
+  beep("win"); var t=$("#title"); t.classList.add("hide");
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },300);
+});
+document.addEventListener("visibilitychange",function(){ if(document.hidden && G[level].state==="play" && !paused) infoCard(); });
+
+/* ===================== FIT TO BOX ===================== */
+var lastW=-1,lastH=-1;
+function fit(){
+  var a=$("#app"), de=document.documentElement, W=de.clientWidth||window.innerWidth, H=de.clientHeight||window.innerHeight;
+  if(!W||!H||(W===lastW&&H===lastH)) return; lastW=W; lastH=H;
+  var k=Math.min(W/600,H/720); a.style.transform="scale("+k+")"; a.style.left=((W-600*k)/2)+"px"; a.style.top=((H-720*k)/2)+"px";
+}
+window.addEventListener("resize",fit); window.addEventListener("load",fit); window.addEventListener("pageshow",fit);
+try{ new ResizeObserver(fit).observe(document.documentElement); }catch(e){}
+setInterval(fit,400); fit();
+
+sizeCanvas(); go(1); requestAnimationFrame(frame);
+window.__G=function(){ return {level:level,G:G,paused:paused,CW:CW,CH:CH}; }; // test hook
+})();
+</script>
+</body>
+</html>
