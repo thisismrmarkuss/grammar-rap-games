@@ -513,12 +513,24 @@ function showHelp(){
 $("#help").addEventListener("click",showHelp);
 
 /* ===================== FIT TO HEYZINE BOX ===================== */
+var lastW=-1,lastH=-1;
 function fit(){
-  var a=$("#app"), W=window.innerWidth, H=window.innerHeight, k=Math.min(W/800,H/500);
+  var a=$("#app"), de=document.documentElement;
+  var W=de.clientWidth||window.innerWidth, H=de.clientHeight||window.innerHeight;
+  if(W===lastW && H===lastH) return;
+  if(!W||!H){ return; }           /* not laid out yet: keep checking */
+  lastW=W; lastH=H;
+  var k=Math.min(W/800,H/500);
   a.style.transform="scale("+k+")";
   a.style.left=((W-800*k)/2)+"px"; a.style.top=((H-500*k)/2)+"px";
 }
-window.addEventListener("resize",fit); fit();
+window.addEventListener("resize",fit);
+window.addEventListener("load",fit);
+window.addEventListener("pageshow",fit);
+document.addEventListener("visibilitychange",fit);
+try{ new ResizeObserver(fit).observe(document.documentElement); }catch(e){}
+setInterval(fit,400);             /* flipbooks resize frames in ways that skip events */
+fit();
 
 /* ===================== NAV ===================== */
 function go(lv){
