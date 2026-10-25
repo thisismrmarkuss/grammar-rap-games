@@ -248,7 +248,7 @@ function showHelp(){
 
 /* ===================== LEVEL FRAMEWORK ===================== */
 var INFO={
-  1:{name:"SLICE IT",how:'Words fly up. <b>Slice only the proper nouns.</b> Leave the common nouns alone. Slice 12 to win. Let 3 get away and you lose a heart.',ctl:'Swipe across a word (or tap it)'},
+  1:{name:"SLICE IT",how:'Balls fly up, each with a word. <b>Slice only the proper nouns.</b> Leave the common nouns alone. Slice 12 to win. Let 3 get away and you lose a heart.',ctl:'Swipe across a word (or tap it)'},
   2:{name:"LANE RACE",how:'A word sign rolls toward you. Steer into the <b>COMMON</b> or <b>PROPER</b> lane before it reaches your car. Clear 16 signs to win.',ctl:'Tap a lane, or use ← → keys'},
   3:{name:"CAPITAL BLASTER",how:'Words fall in lowercase. <b>Blast the ones that need a capital letter.</b> Let common nouns pass. Do not let a proper noun reach the bottom!',ctl:'Tap a word to blast it'}
 };
@@ -290,14 +290,17 @@ function l1Spawn(g){
   var proper = Math.random()<.55;
   var src = proper ? (g.pq.length?g.pq:(g.pq=shuffle(PROPER))) : (g.cq.length?g.cq:(g.cq=shuffle(COMMON)));
   var it=src.pop();
-  var x=rnd(CW*.2,CW*.8);
-  g.items.push({t:it.w.toUpperCase(),it:it,proper:proper,x:x,y:CH+30,vx:(CW/2-x)*rnd(.25,.6),vy:-rnd(Math.sqrt(2*560*CH*.5),Math.sqrt(2*560*CH*.82)),rot:rnd(-.3,.3),vr:rnd(-1.2,1.2),dead:false,halves:null});
+  var x=rnd(CW*.2,CW*.8), tries=0;
+  while(g.lastX!=null && Math.abs(x-g.lastX)<170 && tries++<8) x=rnd(CW*.2,CW*.8);
+  g.lastX=x;
+  var L=ballLayout(it.w.toUpperCase());
+  g.items.push({t:it.w.toUpperCase(),lines:L.lines,fz:L.fz,rad:L.r,pal:Math.floor(Math.random()*BALLS.length),it:it,proper:proper,x:x,y:CH+30,vx:(CW/2-x)*rnd(.25,.6),vy:-rnd(Math.sqrt(2*560*CH*.5),Math.sqrt(2*560*CH*.82)),rot:rnd(-.25,.25),vr:rnd(-.8,.8),dead:false,halves:null});
 }
 function l1Update(g,dt){
   if(g.got>=g.goal){ g.winT=(g.winT||.5)-dt; if(g.winT<=0) return endLevel(true,'You sliced '+g.goal+' proper nouns. Proper nouns name ONE specific person, place or thing.'); }
   g.spawnT-=dt;
   var speedUp=Math.min(1,g.got/g.goal);
-  if(g.spawnT<=0){ l1Spawn(g); if(Math.random()<.25+speedUp*.35) l1Spawn(g); g.spawnT=rnd(1.0,1.5)-speedUp*.45; }
+  if(g.spawnT<=0){ l1Spawn(g); if(Math.random()<.25+speedUp*.35) l1Spawn(g); g.spawnT=rnd(1.0,1.5)-speedUp*.45; g.lastX=null; }
   for(var i=g.items.length-1;i>=0;i--){
     var o=g.items[i];
     if(o.halves){ o.halves.forEach(function(h){h.x+=h.vx*dt;h.y+=h.vy*dt;h.vy+=560*dt;h.r+=h.vr*dt}); o.ht-=dt; if(o.ht<=0) g.items.splice(i,1); continue; }
@@ -312,7 +315,39 @@ function l1Update(g,dt){
   }
   for(var k=g.trail.length-1;k>=0;k--){ g.trail[k].life-=dt; if(g.trail[k].life<=0) g.trail.splice(k,1); }
 }
-function l1Box(o){ ctx.font=font(26); var w=ctx.measureText(o.t).width+30; return {x:o.x-w/2-6,y:o.y-26,w:w+12,h:52}; }
+var BALLS=[{c:"#e07a2e",d:"#a8521a"},{c:"#f2b33d",d:"#b47d1c"},{c:"#b9c23c",d:"#7c8322"},{c:"#d9623b",d:"#94391c"}];
+function ballLayout(t){
+  var words=t.split(" "), fz=24, lines=[t];
+  ctx.font=font(fz);
+  if(words.length>1 && ctx.measureText(t).width>110){
+    var best=null; for(var i=1;i<words.length;i++){ var a=words.slice(0,i).join(" "),b=words.slice(i).join(" "); var m=Math.max(ctx.measureText(a).width,ctx.measureText(b).width); if(!best||m<best.m) best={m:m,l:[a,b]}; }
+    lines=best.l;
+  }
+  var w=Math.max.apply(null,lines.map(function(l){return ctx.measureText(l).width;}));
+  while(w>150 && fz>16){ fz-=2; ctx.font=font(fz); w=Math.max.apply(null,lines.map(function(l){return ctx.measureText(l).width;})); }
+  var r=Math.max(46, Math.min(88, w/2+18 + (lines.length>1?6:0)));
+  return {lines:lines,fz:fz,r:r};
+}
+function l1Box(o){ var r=o.rad||48; return {x:o.x-r,y:o.y-r,w:r*2,h:r*2}; }
+function drawBall(o,red,upright){
+  var r=o.rad, P=BALLS[o.pal]||BALLS[0];
+  ctx.beginPath(); ctx.arc(4,5,r,0,6.2832); ctx.fillStyle="rgba(0,0,0,.55)"; ctx.fill();
+  var gr=ctx.createRadialGradient(-r*.35,-r*.4,r*.1,0,0,r);
+  gr.addColorStop(0,red?"#f07a63":"#f7c27a"); gr.addColorStop(.35,red?"#e5533d":P.c); gr.addColorStop(1,red?"#8f2617":P.d);
+  ctx.beginPath(); ctx.arc(0,0,r,0,6.2832); ctx.fillStyle=gr; ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(0,0,r,0,6.2832); ctx.clip();
+  ctx.strokeStyle="rgba(0,0,0,.45)"; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(-r,0); ctx.lineTo(r,0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,-r); ctx.lineTo(0,r); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-r*1.35,0,r*.95,-.9,.9); ctx.stroke();
+  ctx.beginPath(); ctx.arc(r*1.35,0,r*.95,Math.PI-.9,Math.PI+.9); ctx.stroke();
+  ctx.restore();
+  ctx.beginPath(); ctx.arc(0,0,r,0,6.2832); ctx.lineWidth=3; ctx.strokeStyle="#000"; ctx.stroke();
+  if(upright) ctx.rotate(-o.rot);
+  ctx.font=font(o.fz); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.lineJoin="round";
+  var lh=o.fz*1.05, y0=-(o.lines.length-1)*lh/2;
+  o.lines.forEach(function(l,i){ ctx.lineWidth=6; ctx.strokeStyle="#1a120a"; ctx.strokeText(l,0,y0+i*lh); ctx.fillStyle="#fff"; ctx.fillText(l,0,y0+i*lh); });
+}
 function segHit(ax,ay,bx,by,b){ // segment vs box (sampled)
   var n=Math.max(1,Math.ceil(Math.hypot(bx-ax,by-ay)/6));
   for(var i=0;i<=n;i++){ var x=ax+(bx-ax)*i/n, y=ay+(by-ay)*i/n; if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h) return true; }
@@ -344,11 +379,11 @@ function l1Draw(g){
   ctx.font=font(80); ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle="rgba(242,179,61,.05)"; ctx.fillText("PROPER",CW/2,CH/2-40); ctx.fillText("ONLY",CW/2,CH/2+50);
   g.items.forEach(function(o){
     if(o.halves){
-      o.halves.forEach(function(h){ ctx.save(); ctx.translate(h.x,h.y); ctx.rotate(h.r); ctx.beginPath(); ctx.rect(h.s<0?-400:0,-60,400,120); ctx.clip(); pill(o.t,0,0,26,"#6fd35a","#0d3305"); ctx.restore(); });
+      o.halves.forEach(function(h){ ctx.save(); ctx.translate(h.x,h.y); ctx.rotate(h.r); ctx.beginPath(); ctx.rect(h.s<0?-200:0,-200,200,400); ctx.clip(); drawBall(o,false); ctx.restore(); });
       return;
     }
     ctx.save(); ctx.translate(o.x,o.y); ctx.rotate(o.rot);
-    pill(o.t,0,0,26,o.dead?"#e5533d":"#2e2318",o.dead?"#fff":"#fbf3e4", o.dead?"#000":"#000");
+    drawBall(o,o.dead,true);
     ctx.restore();
   });
   // blade trail
