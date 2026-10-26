@@ -158,8 +158,13 @@ function rnd(a,b){return a+Math.random()*(b-a)}
 function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 
 var stage=$("#stage"), cv=$("#cv"), ctx=cv.getContext("2d");
-var CW=770, CH=410, DPR=2, soundOn=true, actx=null, level=1, total=0;
-function sizeCanvas(){ CW=stage.clientWidth; CH=stage.clientHeight; cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+var CW=770, CH=413, DPR=2, soundOn=true, actx=null, level=1, total=0;
+function sizeCanvas(){
+  var w=stage.clientWidth, h=stage.clientHeight;
+  if(!w||!h) return false;                       /* iframe still hidden: try again next frame */
+  if(w!==CW||h!==CH||cv.width!==w*DPR||cv.height!==h*DPR){ CW=w; CH=h; cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  return true;
+}
 
 function beep(kind){
   if(!soundOn) return;
@@ -238,7 +243,7 @@ function infoCard(){
   $("#start",d).addEventListener("click",function(){ closeOverlay(); paused=false; startLevel(level); });
   var r=$("#resume",d); if(r) r.addEventListener("click",function(){ closeOverlay(); paused=false; g.state="play"; last=performance.now(); });
 }
-function startLevel(lv){ parts=[]; floats=[]; beep("tap"); G[lv]=lv===1?newL1():lv===2?newL2():newL3(); G[lv].state="play"; last=performance.now(); }
+function startLevel(lv){ sizeCanvas(); parts=[]; floats=[]; beep("tap"); G[lv]=lv===1?newL1():lv===2?newL2():newL3(); G[lv].state="play"; last=performance.now(); }
 function endLevel(win,lines){
   var g=G[level]; if(g.state==="over") return; g.state="over"; paused=true; beep(win?"win":"bad");
   var best=parseInt(store("spc_best"+level)||"0",10)||0, nb=false; if(g.score>best){ store("spc_best"+level,String(g.score)); best=g.score; nb=true; }
@@ -252,7 +257,7 @@ function endLevel(win,lines){
 var ROUNDS=[{t:"plural",label:"WHACK THE PLURAL NOUNS"},{t:"singular",label:"WHACK THE SINGULAR NOUNS"},{t:"collective",label:"WHACK THE COLLECTIVE NOUNS"}];
 function newL1(){
   var holes=[]; for(var r=0;r<2;r++) for(var c=0;c<3;c++) holes.push({x:CW*(c*2+1)/6, y:HUD+ (CH-HUD)*(r===0?.36:.80), st:"down",p:0,t:0,w:null,hit:0});
-  return {lives:3,score:0,round:0,got:0,goal:5,holes:holes,spawnT:1.2,banner:1.8,upTime:1.7};
+  return {lives:3,score:0,round:0,got:0,goal:5,holes:holes,spawnT:1.2,banner:1.8,upTime:2.3};
 }
 function l1Word(g){
   var t=ROUNDS[g.round].t, want=Math.random()<.45, pr=pick(PAIRS), co=pick(COLL);
@@ -285,7 +290,7 @@ function l1Tap(x,y){
       if(w.type===t){
         g.got++; g.score+=10; addScore(10); beep("bonk"); burst(h.x,h.y-40,"#f2b33d",16); floatText("+10",h.x,h.y-90,"#6fd35a");
         if(g.got>=g.goal){
-          if(g.round<2){ g.round++; g.got=0; g.banner=1.8; g.upTime=Math.max(1.15,g.upTime-.2); g.holes.forEach(function(o){o.st="down";}); }
+          if(g.round<2){ g.round++; g.got=0; g.banner=1.8; g.upTime=Math.max(1.6,g.upTime-.25); g.holes.forEach(function(o){o.st="down";}); }
           else { g.winAt=.5; g.holes.forEach(function(o){o.st="down";}); }
         }
       } else {
@@ -328,7 +333,7 @@ function l1Draw(g){
 }
 
 /* ===================== LEVEL 2: PLURAL SNAKE ===================== */
-var CELL=32;
+var CELL=42;
 function newL2(){
   var cols=Math.floor(CW/CELL), rows=Math.floor((CH-HUD-4)/CELL), ox=Math.floor((CW-cols*CELL)/2), oy=HUD+4;
   var sy=Math.floor(rows/2), snake=[]; for(var i=0;i<4;i++) snake.push({x:5-i,y:sy});
@@ -340,7 +345,7 @@ function l2NewPrompt(g){
   g.cur=g.q.pop(); g.foods=[];
   var words=shuffle([{t:g.cur.p,ok:1},{t:g.cur.w[0],ok:0},{t:g.cur.w[1],ok:0}]);
   words.forEach(function(f){
-    ctx.font=font(17); var wc=Math.max(2,Math.ceil((ctx.measureText(f.t).width+20)/CELL));
+    ctx.font=font(22); var wc=Math.max(2,Math.ceil((ctx.measureText(f.t).width+20)/CELL));
     for(var tries=0;tries<200;tries++){
       var x=Math.floor(Math.random()*(g.cols-wc)), y=Math.floor(Math.random()*g.rows);
       var head=g.snake[0];
@@ -386,13 +391,13 @@ function l2Draw(g){
     var x=g.ox+f.x*CELL+2, y=g.oy+f.y*CELL+2, w=f.w*CELL-4, h=CELL-4;
     rr(x+2,y+2,w,h,10); ctx.fillStyle="#000"; ctx.fill();
     rr(x,y,w,h,10); ctx.fillStyle="#f2b33d"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke();
-    ctx.font=font(17); ctx.fillStyle="#1a120a"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(f.t,x+w/2,y+h/2+1);
+    ctx.font=font(22); ctx.fillStyle="#1a120a"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(f.t,x+w/2,y+h/2+1);
   });
   for(var i=g.snake.length-1;i>=0;i--){
     var s=g.snake[i], sx=g.ox+s.x*CELL, sy=g.oy+s.y*CELL;
     rr(sx+2,sy+2,CELL-4,CELL-4,9); ctx.fillStyle=i===0?"#b9c23c":(i%2?"#8f9a2a":"#a3ad30"); ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke();
     if(i===0){ ctx.fillStyle="#000"; var ex=g.dir.x, ey=g.dir.y;
-      ctx.beginPath(); ctx.arc(sx+CELL/2+ex*6-ey*7,sy+CELL/2+ey*6-ex*7,3.5,0,6.283); ctx.arc(sx+CELL/2+ex*6+ey*7,sy+CELL/2+ey*6+ex*7,3.5,0,6.283); ctx.fill(); }
+      ctx.beginPath(); ctx.arc(sx+CELL/2+ex*8-ey*9,sy+CELL/2+ey*8-ex*9,4.5,0,6.283); ctx.arc(sx+CELL/2+ex*8+ey*9,sy+CELL/2+ey*8+ex*9,4.5,0,6.283); ctx.fill(); }
   }
   hudBand(); hearts(g.lives); if(g.cur) hudCenter("PLURAL OF:  "+g.cur.s.toUpperCase(),"#f2b33d"); hudRight(g.got+" / "+g.goal);
 }
@@ -457,7 +462,7 @@ function l3Draw(g){
     ctx.fillStyle="#000"; ctx.beginPath(); ctx.arc(t.x+3,t.y+4,48,0,6.283); ctx.fill();
     [48,36,24].forEach(function(rad,i){ ctx.beginPath(); ctx.arc(t.x,t.y,rad,0,6.283); ctx.fillStyle=cols[i]; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke(); });
     ctx.fillStyle="#5a3f22"; ctx.fillRect(t.x-4,t.y+46,8,10);
-    var fz=20; ctx.font=font(fz); while(ctx.measureText(t.w.toUpperCase()).width>118&&fz>13){fz--;ctx.font=font(fz);}
+    var fz=24; ctx.font=font(fz); while(ctx.measureText(t.w.toUpperCase()).width>120&&fz>14){fz--;ctx.font=font(fz);}
     var tw=ctx.measureText(t.w.toUpperCase()).width+18;
     rr(t.x-tw/2,t.y-15,tw,30,8); ctx.fillStyle="#120d08"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke();
     ctx.fillStyle="#f2b33d"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(t.w.toUpperCase(),t.x,t.y+1);
@@ -473,6 +478,7 @@ function l3Draw(g){
 /* ===================== LOOP ===================== */
 var last=performance.now();
 function frame(now){
+  sizeCanvas();
   var dt=Math.min(.05,(now-last)/1000); last=now; var g=G[level];
   if(g.state==="play"&&!paused){
     if(g.winAt!=null&&level===1){ g.winAt-=dt; if(g.winAt<=0) endLevel(true,'You whacked plurals, singulars and collectives. Singular = one, plural = more than one, collective = one group.'); }

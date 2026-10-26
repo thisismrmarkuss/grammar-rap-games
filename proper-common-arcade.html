@@ -166,12 +166,14 @@ function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localSto
 function art(w){return /^[aeiou]/i.test(w)?"an":"a"}
 
 var stage=$("#stage"), cv=$("#cv"), ctx=cv.getContext("2d");
-var CW=570, CH=0, DPR=2;  // canvas size in design px (height measured at start)
+var CW=570, CH=580, DPR=2;  // canvas size in design px (height measured at start)
 var soundOn=true, actx=null, level=1, total=0;
 
 function sizeCanvas(){
-  CW=stage.clientWidth; CH=stage.clientHeight;
-  cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  var w=stage.clientWidth, h=stage.clientHeight;
+  if(!w||!h) return false;                       /* iframe still hidden: try again next frame */
+  if(w!==CW||h!==CH||cv.width!==w*DPR||cv.height!==h*DPR){ CW=w; CH=h; cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  return true;
 }
 
 function beep(kind){
@@ -265,7 +267,7 @@ function infoCard(){
   var r=$("#resume",d); if(r) r.addEventListener("click",function(){ closeOverlay(); paused=false; g.state="play"; last=performance.now(); });
 }
 
-function startLevel(lv){
+function startLevel(lv){ sizeCanvas();
   parts=[]; floats=[]; beep("tap");
   if(lv===1) G[1]=newL1(); else if(lv===2) G[2]=newL2(); else G[3]=newL3();
   G[lv].state="play"; last=performance.now();
@@ -523,6 +525,7 @@ function l3Draw(g){
 /* ===================== LOOP ===================== */
 var last=performance.now();
 function frame(now){
+  sizeCanvas();
   var dt=Math.min(.05,(now-last)/1000); last=now;
   var g=G[level];
   if(g.state==="play" && !paused){
