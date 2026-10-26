@@ -23,12 +23,12 @@ header{height:52px;display:flex;align-items:center;gap:6px}
 .logo{font-size:20px;color:var(--gold);transform:skew(-7deg);text-shadow:2px 2px 0 var(--orange),4px 4px 0 #000;line-height:1;white-space:nowrap}
 .logo small{display:block;font-family:var(--body);font-weight:800;font-size:10px;letter-spacing:.5px;color:var(--olive);text-shadow:none;margin-top:4px}
 nav.tabs{flex:1;display:flex;gap:5px;justify-content:center;min-width:0}
-.tab{background:var(--panel);border:3px solid #000;border-radius:12px;padding:0 8px;height:46px;cursor:pointer;font-size:14px;box-shadow:3px 3px 0 #000;white-space:nowrap}
+.tab{background:var(--panel);border:3px solid #000;border-radius:12px;padding:0 7px;height:46px;cursor:pointer;font-size:13px;box-shadow:3px 3px 0 #000;white-space:nowrap}
 .tab span{color:var(--gold)}
 .tab.active{background:var(--gold);color:#1a120a;box-shadow:3px 3px 0 var(--orange)}
 .tab.active span{color:#1a120a}
 .tab:active{transform:translate(2px,2px)}
-.chip{background:var(--panel);border:3px solid #000;border-radius:12px;height:46px;min-width:84px;display:flex;align-items:center;justify-content:center;padding:0 8px;font-size:16px}
+.chip{background:var(--panel);border:3px solid #000;border-radius:12px;height:46px;min-width:72px;display:flex;align-items:center;justify-content:center;padding:0 8px;font-size:16px}
 .chip b{color:var(--gold);margin-left:5px}
 .iconbtn{background:var(--panel);border:3px solid #000;border-radius:12px;width:44px;height:46px;flex:none;cursor:pointer;font-size:20px}
 #stage{position:relative;flex:1;min-height:0;border:3px solid #000;border-radius:18px;box-shadow:5px 5px 0 #000;overflow:hidden;background:#120d08}
@@ -61,6 +61,9 @@ nav.tabs{flex:1;display:flex;gap:5px;justify-content:center;min-width:0}
 .t-levels div{background:var(--panel2);border:3px solid #000;border-radius:12px;box-shadow:3px 3px 0 #000;padding:7px 14px;font-size:17px}
 .t-levels span{color:var(--gold)}
 #playnow{font-size:36px;padding:14px 46px;border-radius:18px;box-shadow:6px 6px 0 #000;animation:pulse 1.6s ease-in-out infinite}
+.spdrow{display:flex;gap:8px;justify-content:center;align-items:center;margin:0 0 12px;font-family:var(--body);font-weight:800;font-size:17px;color:var(--muted)}
+.spdrow button{background:var(--panel2);border:3px solid #000;border-radius:10px;padding:5px 12px;cursor:pointer;font-family:var(--display);font-size:16px;color:var(--ink);box-shadow:2px 2px 0 #000}
+.spdrow button.on{background:var(--olive);color:#1a120a}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 @keyframes titleout{to{opacity:0;transform:scale(1.04)}}
 @keyframes pop{0%{transform:scale(.6) rotate(-6deg);opacity:0}100%{transform:skew(-7deg) rotate(-2deg);opacity:1}}
@@ -78,6 +81,7 @@ nav.tabs{flex:1;display:flex;gap:5px;justify-content:center;min-width:0}
       <button class="tab" data-l="3" role="tab"><span>3</span> GROUPS</button>
     </nav>
     <div class="chip">PTS<b id="score">0</b></div>
+    <button class="iconbtn spd" id="speed" aria-label="Change speed" title="Speed">🐢</button>
     <button class="iconbtn" id="help" aria-label="Show the rule" title="Rule">?</button>
     <button class="iconbtn" id="mute" aria-label="Toggle sound" title="Sound">🔊</button>
   </header>
@@ -209,6 +213,13 @@ function drawFx(){ parts.forEach(function(p){ ctx.globalAlpha=Math.max(0,p.life/
   ctx.globalAlpha=1; }
 
 /* ===================== OVERLAYS ===================== */
+var SPEEDS=[{k:"slow",label:"SLOW",icon:"🐢",f:.55},{k:"medium",label:"MEDIUM",icon:"🚶",f:.75},{k:"fast",label:"FAST",icon:"🐇",f:1}];
+var speedIx=1; (function(){ var v=store("spc_speed"); for(var i=0;i<SPEEDS.length;i++) if(SPEEDS[i].k===v) speedIx=i; })();
+function setSpeed(i){ speedIx=(i+SPEEDS.length)%SPEEDS.length; store("spc_speed",SPEEDS[speedIx].k);
+  var b=$("#speed"); if(b){ b.textContent=SPEEDS[speedIx].icon; b.title="Speed: "+SPEEDS[speedIx].label; }
+  $$(".spdrow button").forEach(function(x){ x.classList.toggle("on",+x.getAttribute("data-s")===speedIx); }); }
+function speedRow(){ return '<div class="spdrow">SPEED: '+SPEEDS.map(function(sp,i){ return '<button data-s="'+i+'" class="'+(i===speedIx?'on':'')+'">'+sp.icon+' '+sp.label+'</button>'; }).join('')+'</div>'; }
+function wireSpeedRow(d){ $$(".spdrow button",d).forEach(function(b){ b.addEventListener("click",function(){ beep("tap"); setSpeed(+b.getAttribute("data-s")); }); }); }
 var paused=false, pendingCb=null, pendingSkip=null;
 function overlay(html,cls){ closeOverlay(); var d=document.createElement("div"); d.className="ov"; d.innerHTML='<div class="card '+(cls||"")+'">'+html+'</div>'; stage.appendChild(d); return d; }
 function closeOverlay(){ var o=$(".ov",stage); if(o) o.parentNode.removeChild(o); }
@@ -238,10 +249,11 @@ var INFO={
 var G={1:{state:"intro"},2:{state:"intro"},3:{state:"intro"}};
 function infoCard(){
   var g=G[level], i=INFO[level]; if(g.state==="play") g.state="paused"; var ps=g.state==="paused"; paused=true;
-  var d=overlay('<div class="ct">LEVEL '+level+': '+i.name+'</div><div class="cb">'+i.how+'</div><div class="ctl">'+i.ctl+'</div>'+
+  var d=overlay('<div class="ct">LEVEL '+level+': '+i.name+'</div><div class="cb">'+i.how+'</div><div class="ctl">'+i.ctl+'</div>'+speedRow()+
     '<div class="row">'+(ps?'<button class="btn" id="resume">RESUME</button><button class="btn alt" id="start">RESTART</button>':'<button class="btn" id="start">START</button>')+'</div>');
   $("#start",d).addEventListener("click",function(){ closeOverlay(); paused=false; startLevel(level); });
   var r=$("#resume",d); if(r) r.addEventListener("click",function(){ closeOverlay(); paused=false; g.state="play"; last=performance.now(); });
+  wireSpeedRow(d);
 }
 function startLevel(lv){ sizeCanvas(); parts=[]; floats=[]; beep("tap"); G[lv]=lv===1?newL1():lv===2?newL2():newL3(); G[lv].state="play"; last=performance.now(); }
 function endLevel(win,lines){
@@ -481,8 +493,9 @@ function frame(now){
   sizeCanvas();
   var dt=Math.min(.05,(now-last)/1000); last=now; var g=G[level];
   if(g.state==="play"&&!paused){
+    var sdt=dt*SPEEDS[speedIx].f;
     if(g.winAt!=null&&level===1){ g.winAt-=dt; if(g.winAt<=0) endLevel(true,'You whacked plurals, singulars and collectives. Singular = one, plural = more than one, collective = one group.'); }
-    else if(level===1) l1Update(g,dt); else if(level===2) l2Update(g,dt); else l3Update(g,dt);
+    else if(level===1) l1Update(g,sdt); else if(level===2) l2Update(g,sdt); else l3Update(g,sdt);
     stepFx(dt);
   }
   ctx.clearRect(0,0,CW,CH);
@@ -518,6 +531,7 @@ function go(lv){
 }
 $$(".tab").forEach(function(t){ t.addEventListener("click",function(){ beep("tap"); t.blur(); go(+t.getAttribute("data-l")); }); });
 $("#help").addEventListener("click",function(){ this.blur(); showHelp(); });
+$("#speed").addEventListener("click",function(){ beep("tap"); setSpeed(speedIx+1); this.blur(); });
 $("#mute").addEventListener("click",function(){ soundOn=!soundOn; this.textContent=soundOn?"🔊":"🔇"; this.blur(); });
 $("#playnow").addEventListener("click",function(){ beep("win"); var t=$("#title"); t.classList.add("hide"); setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },300); });
 document.addEventListener("visibilitychange",function(){ if(document.hidden&&G[level].state==="play"&&!paused) infoCard(); });
@@ -533,7 +547,7 @@ window.addEventListener("resize",fit); window.addEventListener("load",fit); wind
 try{ new ResizeObserver(fit).observe(document.documentElement); }catch(e){}
 setInterval(fit,400); fit();
 
-sizeCanvas(); go(1); requestAnimationFrame(frame);
+sizeCanvas(); setSpeed(speedIx); go(1); requestAnimationFrame(frame);
 window.__G=function(){ return {level:level,G:G,paused:paused,CW:CW,CH:CH,CELL:CELL}; };
 })();
 </script>
